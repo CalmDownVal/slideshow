@@ -1,0 +1,20 @@
+{
+	"root": true,
+	"extends": [
+		"@calmdownval/eslint-config",
+		"@calmdownval/eslint-config/typescript"
+	],
+	"env": {
+		"browser": true
+	},
+	"parserOptions": {
+		"project": "./packages/*/tsconfig.json"
+	},
+	"settings": {
+		"import/resolver": {
+			"@calmdownval/eslint-import-resolver-typescript": {
+				"project": "./packages/*/tsconfig.json"
+			}
+		}
+	}
+}

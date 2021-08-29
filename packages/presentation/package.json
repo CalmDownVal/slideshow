@@ -1,0 +1,30 @@
+{
+	"name": "@calmdownval/presentation",
+	"version": "1.0.0",
+	"license": "ISC",
+	"main": "./build/index.cjs.min.js",
+	"module": "./build/index.esm.min.js",
+	"types": "./build/index.d.ts",
+	"exports": {
+		".": {
+			"require": "./build/index.cjs.min.js",
+			"default": "./build/index.esm.min.js"
+		}
+	},
+	"peerDependencies": {
+		"react": ">=17"
+	},
+	"devDependencies": {
+		"@rollup/plugin-typescript": "8.2.5",
+		"@types/react": "17.0.19",
+		"rollup": "2.56.3",
+		"rollup-plugin-delete": "2.0.0",
+		"rollup-plugin-dts": "4.0.0",
+		"rollup-plugin-terser": "7.0.2",
+		"typescript": "4.4.2",
+		"tslib": "2.3.1"
+	},
+	"scripts": {
+		"build": "rollup --config"
+	}
+}
