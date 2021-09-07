@@ -1,5 +1,6 @@
 {
 	"compilerOptions": {
+		"baseUrl": "./src",
 		"charset": "utf8",
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
@@ -13,7 +14,13 @@
 		"module": "esnext",
 		"moduleResolution": "node",
 		"newLine": "lf",
+		"paths": {
+			"~/*": [
+				"*"
+			]
+		},
 		"skipLibCheck": true,
+		"stripInternal": true,
 		"strict": true,
 		"target": "esnext",
 		"types": []

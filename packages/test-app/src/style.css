@@ -1,0 +1,12 @@
+html, body {
+	margin: 0;
+	padding: 0;
+}
+
+.cdv-presentation {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	top: 0;
+}

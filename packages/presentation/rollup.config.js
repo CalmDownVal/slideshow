@@ -1,7 +1,7 @@
-import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
 import deleteBeforeBuild from 'rollup-plugin-delete';
 import definitions from 'rollup-plugin-dts';
+import externals from 'rollup-plugin-node-externals';
 import { terser } from 'rollup-plugin-terser';
 
 const codeOutputOpts = {
@@ -21,11 +21,11 @@ export default [
 	{
 		input: './src/index.ts',
 		output: [
-			{
-				...codeOutputOpts,
-				file: './build/index.cjs.min.js',
-				format: 'cjs'
-			},
+			// {
+			// 	...codeOutputOpts,
+			// 	file: './build/index.cjs.min.js',
+			// 	format: 'cjs'
+			// },
 			{
 				...codeOutputOpts,
 				file: './build/index.esm.min.js',
@@ -35,8 +35,8 @@ export default [
 		plugins: [
 			deleteBeforeBuild({ targets: './build/*' }),
 			typescript(),
-			nodeResolve({
-				browser: true
+			externals({
+				peerDeps: true
 			})
 		]
 	},
@@ -46,6 +46,9 @@ export default [
 			file: `./build/index.d.ts`,
 			format: 'es'
 		},
-		plugins: [ definitions() ]
+		plugins: [
+			typescript(),
+			definitions()
+		]
 	}
 ];

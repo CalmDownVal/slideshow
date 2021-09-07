@@ -1,0 +1,33 @@
+.cdv-presentation {
+	position: relative;
+	contain: strict;
+}
+
+.cdv-presentation--horizontal {
+	overflow-x: scroll;
+}
+
+.cdv-presentation--vertical {
+	overflow-y: scroll;
+}
+
+.cdv-presentation__slide,
+.cdv-presentation__expander {
+	position: absolute;
+}
+
+.cdv-presentation__slide--docked {
+	position: sticky;
+}
+
+.cdv-presentation--horizontal > .cdv-presentation__slide,
+.cdv-presentation--horizontal > .cdv-presentation__expander {
+	top: 0;
+	bottom: 0;
+}
+
+.cdv-presentation--vertical > .cdv-presentation__slide,
+.cdv-presentation--vertical > .cdv-presentation__expander {
+	left: 0;
+	right: 0;
+}
