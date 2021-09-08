@@ -1,5 +1,7 @@
 # React Presentations
 
+A tiny (~ 10kB) library for scroll presentations with React.
+
 ## Installation
 
 Built for React v17.
@@ -117,9 +119,9 @@ const Content = ({ metadata }: SlideComponentProps<string>) => (
 export const App = () => (
   <ScrollPresentation>
     <Viewport scrollable>
-      <Slide component={Content} metadata='First Slide' />
-      <Slide component={Content} metadata='Second Slide' />
-      <Slide component={Content} metadata='Third Slide' />
+      <Slide component={Content} metadata='First' />
+      <Slide component={Content} metadata='Second' />
+      <Slide component={Content} metadata='Third' />
     </Viewport>
   </ScrollPresentation>
 );
