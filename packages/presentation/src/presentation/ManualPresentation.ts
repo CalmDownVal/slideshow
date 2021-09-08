@@ -11,7 +11,7 @@ export class ManualPresentation extends PresentationBase<ManualPresentationProps
 		super.componentDidUpdate();
 
 		const { isHorizontal, position } = this;
-		this.wrapper?.scrollTo(
+		this.viewport?.scrollTo(
 			isHorizontal ? position : 0,
 			isHorizontal ? 0 : position
 		);
@@ -20,6 +20,10 @@ export class ManualPresentation extends PresentationBase<ManualPresentationProps
 	public render() {
 		this.position = this.props.position / UNIT * this.scrollLength;
 		return super.render();
+	}
+
+	public scrollTo() {
+		// no-op
 	}
 
 	public static readonly defaultProps = PresentationBase.defaultProps;

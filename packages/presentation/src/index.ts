@@ -1,11 +1,15 @@
-export * from '~/components/ManualPresentation';
-export * from '~/components/PresentationBase';
-export * from '~/components/ScrollPresentation';
-export * from '~/components/Slide';
+export * from '~/presentation/ManualPresentation';
+export * from '~/presentation/Navigation';
+export * from '~/presentation/PresentationBase';
+export * from '~/presentation/Progression';
+export * from '~/presentation/ScrollPresentation';
+export * from '~/presentation/Slide';
+export * from '~/presentation/Viewport';
 
-export * from '~/context/useNavigation';
-export * from '~/context/useProgression';
+export * from '~/hooks/useNavigation';
+export * from '~/hooks/useProgression';
 
+export * from '~/utils/animation';
 export * from '~/utils/constants';
 export * from '~/utils/filterProps';
 export * from '~/utils/math';

@@ -1,0 +1,34 @@
+.navigation {
+	position: sticky;
+	right: 0;
+	left: 0;
+	top: 0;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	background: rgba(0, 0, 0, .1);
+	user-select: none;
+	backdrop-filter: blur(48px);
+}
+
+.navigation__item {
+	display: inline;
+}
+
+.navigation__button {
+	display: inline-block;
+	padding: 1rem 2rem;
+	border-bottom: 4px solid transparent;
+	cursor: pointer;
+	transition: border .1s linear;
+	font-size: 1.5rem;
+	font-weight: 500;
+}
+
+.navigation__button:hover {
+	border-bottom-color: #666;
+}
+
+.navigation__item--active .navigation__button {
+	border-bottom-color: #007acc;
+}

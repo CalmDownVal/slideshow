@@ -1,13 +1,13 @@
-import { CSSProperties, ComponentType, Component, HTMLAttributes, createElement, ReactNode } from 'react';
+import { createContext, CSSProperties, ComponentType, Component, HTMLAttributes, createElement, ReactNode } from 'react';
 
-import { Navigation, NavigationContext } from '~/context/useNavigation';
-import { Progression, ProgressionContext } from '~/context/useProgression';
+import type { Navigation } from '~/presentation/Navigation';
+import { Progression } from '~/presentation/Progression';
 import { UNIT } from '~/utils/constants';
 import { createFilter, filterProps } from '~/utils/filterProps';
 import { bem, cx } from '~/utils/style';
 import type { OptionalsOf } from '~/utils/types';
 
-import type { PresentationBase } from './PresentationBase';
+import { PresentationBase, PresentationContext } from './PresentationBase';
 
 export interface SliceComponentProps<TMeta = any> {
 	readonly metadata?: TMeta;
@@ -43,6 +43,8 @@ const OWN_PROPS = createFilter<keyof SlideProps>([
 	'tagName'
 ]);
 
+export const ProgressionContext = createContext<Progression | null>(null);
+
 export class Slide<TMeta = any> extends Component<SlideProps<TMeta>, SlideState> {
 	declare public context: Navigation | null;
 	public readonly state: SlideState = {
@@ -63,6 +65,10 @@ export class Slide<TMeta = any> extends Component<SlideProps<TMeta>, SlideState>
 	}
 
 	public render(): ReactNode {
+		if (!this.context) {
+			throw new Error('<Slide /> can only be used within a <Presentation />');
+		}
+
 		if ((this.state.isClipped && !this.props.persist) || !this.presentation) {
 			return null;
 		}
@@ -120,7 +126,7 @@ export class Slide<TMeta = any> extends Component<SlideProps<TMeta>, SlideState>
 	}
 
 	public componentWillUnmount() {
-		this.presentation?.unregister(this);
+		this.presentation?.removeSlide(this);
 		this.presentation = null;
 	}
 
@@ -131,15 +137,15 @@ export class Slide<TMeta = any> extends Component<SlideProps<TMeta>, SlideState>
 			return;
 		}
 
-		oldPresentation?.unregister(this);
+		oldPresentation?.removeSlide(this);
 		this.presentation = newPresentation ?? null;
 		if (newPresentation) {
 			this.fallbackOrder = newPresentation.getFallbackOrder();
-			newPresentation.register(this);
+			newPresentation.addSlide(this);
 		}
 	}
 
-	public static readonly contextType = NavigationContext;
+	public static readonly contextType = PresentationContext;
 	public static readonly defaultProps: OptionalsOf<SlideProps> = {
 		dock: 0,
 		length: UNIT,

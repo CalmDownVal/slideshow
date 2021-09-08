@@ -1,8 +1,6 @@
-import { createContext, useContext } from 'react';
-
 import { UNIT } from '~/utils/constants';
 import { clamp } from '~/utils/math';
-import { Mutable } from '~/utils/types';
+import type { Mutable } from '~/utils/types';
 
 export enum ProgressionOffset {
 	Appear = 0,
@@ -38,8 +36,8 @@ export class Progression {
 	}
 
 	/** @internal */
-	public static create(value: number, dockLength: number, slideLength: number) {
-		const instance = new Progression() as Mutable<Progression>;
+	public static create(value: number, dockLength: number, slideLength: number): Progression {
+		const instance: Mutable<Progression> = new Progression();
 
 		instance.appear = clamp(value - ProgressionOffset.Appear);
 		instance.disappear = clamp(value - ProgressionOffset.Disappear);
@@ -58,15 +56,4 @@ export class Progression {
 
 		return instance;
 	}
-}
-
-export const ProgressionContext = createContext<Progression | null>(null);
-
-export function useProgression() {
-	const progression = useContext(ProgressionContext);
-	if (progression === null) {
-		throw new Error('useProgression can only be used within child components of a <Slide />');
-	}
-
-	return progression;
 }

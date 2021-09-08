@@ -1,13 +1,13 @@
-.cdv-presentation {
+.cdv-presentation__viewport {
 	position: relative;
 	contain: strict;
 }
 
-.cdv-presentation--horizontal {
+.cdv-presentation__viewport--horizontal {
 	overflow-x: scroll;
 }
 
-.cdv-presentation--vertical {
+.cdv-presentation__viewport--vertical {
 	overflow-y: scroll;
 }
 
@@ -20,14 +20,14 @@
 	position: sticky;
 }
 
-.cdv-presentation--horizontal > .cdv-presentation__slide,
-.cdv-presentation--horizontal > .cdv-presentation__expander {
+.cdv-presentation__viewport--horizontal > .cdv-presentation__slide,
+.cdv-presentation__viewport--horizontal > .cdv-presentation__expander {
 	top: 0;
 	bottom: 0;
 }
 
-.cdv-presentation--vertical > .cdv-presentation__slide,
-.cdv-presentation--vertical > .cdv-presentation__expander {
+.cdv-presentation__viewport--vertical > .cdv-presentation__slide,
+.cdv-presentation__viewport--vertical > .cdv-presentation__expander {
 	left: 0;
 	right: 0;
 }

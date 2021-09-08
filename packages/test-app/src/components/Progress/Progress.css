@@ -1,7 +1,7 @@
 .progress {
 	display: flex;
 	align-items: center;
-	max-width: 15rem;
+	width: 20rem;
 	padding: .5rem;
 }
 
@@ -12,6 +12,7 @@
 .progress__wrapper {
 	flex: 2;
 	border: 2px solid #007acc;
+	border-radius: 3px;
 	padding: 2px;
 }
 
