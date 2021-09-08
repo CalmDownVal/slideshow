@@ -2,6 +2,8 @@
 
 ## Installation
 
+Built for React v17.
+
 You can install this package using NPM or Yarn. It already contains its own
 typings and needs no additional dependencies to use with TypeScript.
 
