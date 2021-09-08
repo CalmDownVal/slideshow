@@ -4,11 +4,19 @@
 }
 
 .cdv-presentation__viewport--horizontal {
-	overflow-x: scroll;
+	overflow: hidden clip;
 }
 
 .cdv-presentation__viewport--vertical {
-	overflow-y: scroll;
+	overflow: clip hidden;
+}
+
+.cdv-presentation__viewport--scrollable.cdv-presentation__viewport--horizontal {
+	overflow: scroll clip;
+}
+
+.cdv-presentation__viewport--scrollable.cdv-presentation__viewport--vertical {
+	overflow: clip scroll;
 }
 
 .cdv-presentation__slide,

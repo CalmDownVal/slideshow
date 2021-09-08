@@ -1,4 +1,4 @@
-export function bem(componentName: string, modifiers: Record<string, boolean>) {
+export function bem(componentName: string, modifiers: Record<string, boolean | null | undefined>) {
 	let classNames = componentName;
 	for (const modifier in modifiers) {
 		if (modifiers[modifier]) {

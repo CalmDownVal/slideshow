@@ -1,17 +1,19 @@
 import { Component, createElement, HTMLAttributes, ReactNode, RefAttributes } from 'react';
 
 import type { Navigation } from '~/presentation/Navigation';
-import { PresentationBase, PresentationContext } from '~/presentation/PresentationBase';
+import { PresentationContext } from '~/presentation/PresentationBase';
 import { createFilter, filterProps } from '~/utils/filterProps';
 import { bem, cx } from '~/utils/style';
 import type { OptionalsOf } from '~/utils/types';
 
 export interface ViewportProps extends HTMLAttributes<HTMLElement> {
+	readonly scrollable?: boolean;
 	readonly tagName?: string;
 }
 
 const OWN_PROPS = createFilter<keyof ViewportProps>([
 	'children',
+	'scrollable',
 	'tagName'
 ]);
 
@@ -30,7 +32,8 @@ export class Viewport extends Component<ViewportProps> {
 		props.className = cx(
 			bem('cdv-presentation__viewport', {
 				horizontal: isHorizontal,
-				vertical: !isHorizontal
+				vertical: !isHorizontal,
+				scrollable: this.props.scrollable
 			}),
 			this.props.className
 		);
@@ -56,6 +59,7 @@ export class Viewport extends Component<ViewportProps> {
 
 	public static readonly contextType = PresentationContext;
 	public static readonly defaultProps: OptionalsOf<ViewportProps> = {
+		scrollable: false,
 		tagName: 'div'
 	};
 }

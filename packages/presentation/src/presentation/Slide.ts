@@ -9,12 +9,12 @@ import type { OptionalsOf } from '~/utils/types';
 
 import { PresentationBase, PresentationContext } from './PresentationBase';
 
-export interface SliceComponentProps<TMeta = any> {
+export interface SlideComponentProps<TMeta = any> {
 	readonly metadata?: TMeta;
 }
 
 export interface SlideProps<TMeta = any> extends HTMLAttributes<HTMLElement> {
-	readonly component: ComponentType<SliceComponentProps<TMeta>>;
+	readonly component: ComponentType<SlideComponentProps<TMeta>>;
 	readonly dock?: number;
 	readonly length?: number;
 	readonly metadata?: TMeta;
