@@ -21,11 +21,11 @@ export default [
 	{
 		input: './src/index.ts',
 		output: [
-			// {
-			// 	...codeOutputOpts,
-			// 	file: './build/index.cjs.min.js',
-			// 	format: 'cjs'
-			// },
+			{
+				...codeOutputOpts,
+				file: './build/index.cjs.min.js',
+				format: 'cjs'
+			},
 			{
 				...codeOutputOpts,
 				file: './build/index.esm.min.js',
