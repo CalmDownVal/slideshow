@@ -42,40 +42,36 @@ function byOrderAsc(a: Slide, b: Slide) {
 }
 
 function solveProgression(layout: SlideLayout, position: number, dockShift: number) {
-	/*
 	const { dock, length } = layout.slide.props;
 
 	const maxLength = Math.min(length!, UNIT);
+
 	const visibleLength = clamp(
-		layout.isDocked
-			? UNIT - layout.dockOffset
-			: layout.offset < position
-				? layout.offset + length! - position
-				: position + UNIT - layout.offset,
+		layout.isDocked && layout.position > dockShift
+			? UNIT - layout.position + dockShift
+			: layout.position > position
+				? position + UNIT - layout.position
+				: layout.position + length! + (layout.isDocked ? dock! : 0) - position,
 		0,
 		maxLength
 	);
 
 	if (visibleLength < maxLength) {
-		return layout.offset > position
+		return layout.position + dockShift > position
 			? ProgressionOffset.Appear + visibleLength / maxLength
-			: ProgressionOffset.Disappear - visibleLength / maxLength + 1;
+			: ProgressionOffset.Disappear + 1 - visibleLength / maxLength;
 	}
 
 	const totalScrollLength = Math.abs(UNIT - length!) + dock!;
-	const mainStartBase = layout.offset - (maxLength < UNIT ? UNIT - maxLength : 0);
-
-	const mainStart = layout.isDocked && layout.dockOffset > 0
-		? position - (UNIT - mainStartBase + layout.offsetLength)
-		: mainStartBase;
-
-	if (layout.slide.order === 3) {
-		console.log(UNIT - mainStartBase, layout.offset - layout.dockOffset, maxLength);
+	if (totalScrollLength === 0) {
+		return ProgressionOffset.Disappear;
 	}
 
+	const mainStart = layout.isDocked && layout.position > dockShift
+		? position - dockShift + (layout.position - Math.max(UNIT - maxLength, 0))
+		: layout.position - Math.max(UNIT - maxLength, 0);
+
 	return ProgressionOffset.Main + Math.max(position - mainStart, 0) / totalScrollLength;
-	*/
-	return 0;
 }
 
 export abstract class PresentationBase<TProps extends PresentationBaseProps = PresentationBaseProps> extends PureComponent<TProps> {

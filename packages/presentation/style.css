@@ -16,10 +16,6 @@
 	position: absolute;
 }
 
-.cdv-presentation__slide {
-	overflow: hidden;
-}
-
 .cdv-presentation__slide--docked {
 	position: sticky;
 }
