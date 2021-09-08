@@ -1,9 +1,10 @@
-import { createElement, HTMLAttributes, PureComponent, RefAttributes } from 'react';
+import { createElement, HTMLAttributes, PureComponent, ReactNode, RefAttributes } from 'react';
 
 import { Navigation, NavigationContext } from '~/context/useNavigation';
-import { SlidePhase } from '~/context/useProgression';
+import { ProgressionOffset } from '~/context/useProgression';
 import { UNIT } from '~/utils/constants';
 import { createFilter, filterProps } from '~/utils/filterProps';
+import { clamp } from '~/utils/math';
 import { mergeSort } from '~/utils/mergeSort';
 import { bem, cx, px } from '~/utils/style';
 import type { OptionalsOf } from '~/utils/types';
@@ -26,7 +27,7 @@ interface SlideLayout {
 	isClipped: boolean;
 	isDocked: boolean;
 	isVisible: boolean;
-	offset: number;
+	position: number;
 }
 
 const OWN_PROPS = createFilter<keyof PresentationBaseProps>([
@@ -38,6 +39,43 @@ const OWN_PROPS = createFilter<keyof PresentationBaseProps>([
 
 function byOrderAsc(a: Slide, b: Slide) {
 	return a.order - b.order;
+}
+
+function solveProgression(layout: SlideLayout, position: number, dockShift: number) {
+	/*
+	const { dock, length } = layout.slide.props;
+
+	const maxLength = Math.min(length!, UNIT);
+	const visibleLength = clamp(
+		layout.isDocked
+			? UNIT - layout.dockOffset
+			: layout.offset < position
+				? layout.offset + length! - position
+				: position + UNIT - layout.offset,
+		0,
+		maxLength
+	);
+
+	if (visibleLength < maxLength) {
+		return layout.offset > position
+			? ProgressionOffset.Appear + visibleLength / maxLength
+			: ProgressionOffset.Disappear - visibleLength / maxLength + 1;
+	}
+
+	const totalScrollLength = Math.abs(UNIT - length!) + dock!;
+	const mainStartBase = layout.offset - (maxLength < UNIT ? UNIT - maxLength : 0);
+
+	const mainStart = layout.isDocked && layout.dockOffset > 0
+		? position - (UNIT - mainStartBase + layout.offsetLength)
+		: mainStartBase;
+
+	if (layout.slide.order === 3) {
+		console.log(UNIT - mainStartBase, layout.offset - layout.dockOffset, maxLength);
+	}
+
+	return ProgressionOffset.Main + Math.max(position - mainStart, 0) / totalScrollLength;
+	*/
+	return 0;
 }
 
 export abstract class PresentationBase<TProps extends PresentationBaseProps = PresentationBaseProps> extends PureComponent<TProps> {
@@ -86,7 +124,7 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 		}
 	}
 
-	public render() {
+	public render(): ReactNode {
 		const { isHorizontal } = this;
 		const props = filterProps<PresentationBaseProps & RefAttributes<HTMLDivElement>>(this.props, OWN_PROPS);
 		props.ref = this.onWrapperRefStable;
@@ -176,81 +214,61 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 		const ratio = this.clientLength / UNIT;
 		const position = this.position / ratio;
 
-		let offset = 0;
-		for (let slide, totalLength, clipBoundary, i = 0; i < layouts.length; ++i) {
-			slide = slides[i];
-			totalLength = slide.props.length! + slide.props.dock!;
-			clipBoundary = Math.max(
-				offset - (position + UNIT),
-				position - (offset + totalLength)
+		let offsetDockLower = 0;
+		let offsetDockUpper = 0;
+		let offsetLength = 0;
+		let dockShift = 0;
+
+		for (let foundVisible = false, isDocked = false, i = 0; i < layouts.length; ++i) {
+			const slide = slides[i];
+			const { dock, length } = slide.props;
+			const clipBoundary = Math.max(
+				offsetDockLower + offsetLength - (position + UNIT),
+				position - (offsetDockLower + dock! + offsetLength + length!)
 			);
 
-			layouts[i] = {
-				isClipped: clipBoundary >= clipThreshold!,
-				isDocked: false,
-				isVisible: clipBoundary < 0,
-				offset,
-				slide
+			const isVisible = clipBoundary < 0;
+			const layout: SlideLayout = {
+				isClipped: clipBoundary >= (isDocked ? 0 : clipThreshold!),
+				isDocked,
+				isVisible,
+				slide,
+				position: offsetDockLower + offsetLength
 			};
 
-			offset += totalLength;
+			if (isVisible && !isDocked && dock! > 0) {
+				const overlap = position - offsetDockLower - offsetLength;
+				if (overlap > dock!) {
+					layout.position += dock!;
+				}
+				else if (overlap >= 0) {
+					layout.isDocked = true;
+					foundVisible = true;
+					isDocked = true;
+					dockShift = layout.position;
+				}
+			}
+
+			if (foundVisible) {
+				offsetDockUpper += dock!;
+			}
+			else {
+				offsetDockLower += dock!;
+			}
+
+			foundVisible ||= isVisible;
+			offsetLength += length!;
+			layouts[i] = layout;
 		}
 
 		// We now know the total length of our slides.
 		// Adjust the expander to always preserve the correct scrollLength
 		if (expander) {
 			expander.style[axisLength] = '1px';
-			expander.style[axisPosition] = px(offset * ratio - 1);
+			expander.style[axisPosition] = px((offsetDockLower + offsetDockUpper + offsetLength) * ratio - 1);
 		}
 
-		// pass 2: find visible slides and adjust layouts for docking
-		for (let layout, i = 0; i < layouts.length; ++i) {
-			layout = layouts[i];
-			if (!layout.isVisible) {
-				continue;
-			}
-
-			const dock = layout.slide.props.dock!;
-			if (dock > 0) {
-				const overlap = position - layout.offset;
-				layout.isDocked = overlap >= 0 && overlap <= dock;
-
-				if (layout.isDocked) {
-					let dockOffset = 0;
-					while (dockOffset < UNIT && i < layouts.length) {
-						layout.isClipped = false;
-						layout.isDocked = true;
-						layout.isVisible = true;
-						layout.offset = dockOffset;
-
-						dockOffset += layout.slide.props.length!;
-						layout = layouts[++i];
-					}
-
-					break;
-				}
-				else if (overlap > dock) {
-					layout.offset += dock;
-				}
-				else {
-					const dockVisibilityThreshold = position + UNIT;
-					const dockClippingThreshold = UNIT + clipThreshold! - overlap - layout.slide.props.length!;
-					let dockOffset = 0;
-					let y = i;
-
-					while (dockOffset < dockClippingThreshold && ++y < layouts.length) {
-						layout = layouts[y];
-						layout.offset -= dock;
-						layout.isClipped = false;
-						layout.isVisible = layout.offset < dockVisibilityThreshold;
-
-						dockOffset += layout.slide.props.length!;
-					}
-				}
-			}
-		}
-
-		// pass 3: solve progression and dispatch state changes
+		// pass 2: solve progression and dispatch state changes
 		for (let layout, i = 0; i < layouts.length; ++i) {
 			layout = layouts[i];
 			layout.slide.setState({
@@ -258,10 +276,10 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 				isDocked: layout.isDocked,
 				isVisible: layout.isVisible,
 				layout: {
-					[axisPosition]: px(layout.offset * ratio),
+					[axisPosition]: px((layout.position - dockShift) * ratio),
 					[axisLength]: px(layout.slide.props.length! * ratio)
 				},
-				progression: 0 // TODO
+				progressionValue: solveProgression(layout, position, dockShift)
 			});
 		}
 	}
@@ -295,7 +313,7 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	};
 
 	public static readonly defaultProps: OptionalsOf<PresentationBaseProps> = {
-		clipThreshold: UNIT * 2 / 3,
+		clipThreshold: UNIT / 3,
 		direction: Direction.TopToBottom,
 		tagName: 'div'
 	};

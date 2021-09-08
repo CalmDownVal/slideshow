@@ -1,68 +1,72 @@
-import { createContext, useContext, useMemo } from 'react';
+import { createContext, useContext } from 'react';
 
-import { EMPTY } from '~/utils/constants';
+import { UNIT } from '~/utils/constants';
+import { clamp } from '~/utils/math';
+import { Mutable } from '~/utils/types';
 
-export enum SlidePhase {
-	/**
-	 * When the slide enters the screen
-	 */
-	FirstAppeared = 0,
-
-	/**
-	 * When the maximum visible area of the slide is first reached for regular
-	 * Slides or when docking starts for Slides with dock set to > 0.
-	 */
-	PeakStart = 1,
-
-	/**
-	 * When the maximum visible area of the slide is last reached for regular
-	 * Slides or when docking ends for Slides with dock set to > 0.
-	 */
-	PeakEnd = 2,
-
-	/**
-	 * When the slide exists the screen
-	 */
-	LastAppeared = 3
+export enum ProgressionOffset {
+	Appear = 0,
+	Main = 1,
+	Disappear = 2
 }
 
 export class Progression {
+	public readonly appear!: number;
+	public readonly disappear!: number;
+	public readonly dock: number = 0;
+	public readonly main!: number;
+
 	/** @internal */
-	public rawValue = 0;
+	public readonly value!: number;
 
 	private constructor() {}
 
-	public readonly toSimpleStyle = (start = SlidePhase.FirstAppeared, end = SlidePhase.LastAppeared) => ({
-		animationDelay: `-${this.toValue(start, end)}s`
-	});
+	public static animate(animationName: string, value: number) {
+		return {
+			animationDelay: `-${clamp(value)}s`,
+			animationDuration: '1s',
+			animationFillMode: 'both',
+			animationName,
+			animationPlayState: 'paused'
+		};
+	}
 
-	public readonly toStyle = (animationName: string, start = SlidePhase.FirstAppeared, end = SlidePhase.LastAppeared) => ({
-		animationDelay: `-${this.toValue(start, end)}s`,
-		animationDuration: '1s',
-		animationFillMode: 'both',
-		animationName,
-		animationPlayState: 'paused'
-	});
+	public static offset(value: number) {
+		return {
+			animationDelay: `-${clamp(value)}s`
+		};
+	}
 
-	public readonly toValue = (start = SlidePhase.FirstAppeared, end = SlidePhase.LastAppeared) => {
-		const scale = end - start;
-		return Math.abs(scale) > Number.EPSILON
-			? Math.min(Math.max((this.rawValue - start) / scale, 0), 1)
-			: 0;
-	};
+	/** @internal */
+	public static create(value: number, dockLength: number, slideLength: number) {
+		const instance = new Progression() as Mutable<Progression>;
 
-	public static readonly init = () => new Progression();
+		instance.appear = clamp(value - ProgressionOffset.Appear);
+		instance.disappear = clamp(value - ProgressionOffset.Disappear);
+		instance.main = clamp(value - ProgressionOffset.Main);
+		instance.value = value;
+
+		if (dockLength > 0) {
+			const startOffset = Math.max(UNIT - slideLength, 0);
+			const endOffset = Math.max(slideLength - UNIT, 0);
+
+			const dockStart = startOffset / (startOffset + dockLength);
+			const dockEnd = 1 - endOffset / (endOffset + dockLength);
+
+			instance.dock = (instance.main - dockStart) / (dockEnd - dockStart);
+		}
+
+		return instance;
+	}
 }
 
-export const ProgressionContext = createContext<number | null>(null);
+export const ProgressionContext = createContext<Progression | null>(null);
 
 export function useProgression() {
-	const wrapper = useMemo(Progression.init, EMPTY);
-	const rawValue = useContext(ProgressionContext);
-	if (rawValue === null) {
+	const progression = useContext(ProgressionContext);
+	if (progression === null) {
 		throw new Error('useProgression can only be used within child components of a <Slide />');
 	}
 
-	wrapper.rawValue = rawValue;
-	return wrapper;
+	return progression;
 }

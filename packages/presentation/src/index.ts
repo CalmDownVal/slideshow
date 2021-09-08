@@ -8,6 +8,7 @@ export * from '~/context/useProgression';
 
 export * from '~/utils/constants';
 export * from '~/utils/filterProps';
+export * from '~/utils/math';
 export * from '~/utils/mergeSort';
 export * from '~/utils/style';
 export * from '~/utils/types';

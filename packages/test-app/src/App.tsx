@@ -1,20 +1,17 @@
-import { ScrollPresentation } from '@calmdownval/presentation';
+import { ScrollPresentation, Slide } from '@calmdownval/presentation';
 import React from 'react';
 
-import { ColorSlide } from '~/components/ColorSlide';
-import { ColorGenerator } from '~/utils/ColorGenerator';
-
-const generator = new ColorGenerator();
+import { Transitions } from '~/components/Transitions/Transitions';
 
 export function App() {
 	return (
 		<>
 			<ScrollPresentation>
-				<ColorSlide generator={generator} />
-				<ColorSlide generator={generator} length={0.3} dock={0.5} />
-				<ColorSlide generator={generator} length={0.3} dock={0.5} />
-				<ColorSlide generator={generator} length={0.3} dock={0.5} />
-				<ColorSlide generator={generator} />
+				<Slide component={Transitions} metadata='1' />
+				<Slide component={Transitions} metadata='2' length={0.3} dock={0.5} />
+				<Slide component={Transitions} metadata='3' length={0.3} dock={0.5} />
+				<Slide component={Transitions} metadata='4' length={0.3} dock={0.5} />
+				<Slide component={Transitions} metadata='5' />
 			</ScrollPresentation>
 		</>
 	);

@@ -16,6 +16,10 @@
 	position: absolute;
 }
 
+.cdv-presentation__slide {
+	overflow: hidden;
+}
+
 .cdv-presentation__slide--docked {
 	position: sticky;
 }
@@ -30,4 +34,10 @@
 .cdv-presentation--vertical > .cdv-presentation__expander {
 	left: 0;
 	right: 0;
+}
+
+.cdv-animated {
+	animation-duration: 1s;
+	animation-fill-mode: both;
+	animation-play-state: paused;
 }

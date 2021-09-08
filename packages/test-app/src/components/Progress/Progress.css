@@ -1,0 +1,22 @@
+.progress {
+	margin: .5rem;
+}
+
+.progress__wrapper {
+	max-width: 10rem;
+	border: 2px solid #007acc;
+	padding: 2px;
+}
+
+.progress__indicator {
+	height: 1rem;
+	background: #007acc;
+	transform-origin: 0 0;
+	animation-timing-function: linear;
+	will-change: transform;
+}
+
+@keyframes progress-scale {
+	  0% { transform: scale3d(0, 1, 1); }
+	100% { transform: scale3d(1, 1, 1); }
+}

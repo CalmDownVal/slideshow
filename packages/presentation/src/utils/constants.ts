@@ -3,8 +3,3 @@
  * Presentation.
  */
 export const UNIT = 1.0;
-
-/**
- * An empty array.
- */
-export const EMPTY: readonly [] = [];
