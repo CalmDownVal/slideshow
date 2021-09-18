@@ -107,7 +107,7 @@ be used to scroll to a specific slide programmatically.
 This example shows a super simple presentation 
 
 ```tsx
-import { SlideComponentProps } from '@calmdownval/presentation';
+import { ScrollPresentation, Slide, SlideComponentProps, Viewport } from '@calmdownval/presentation';
 import React from 'react';
 
 import '@calmdownval/presentation/style.css';
