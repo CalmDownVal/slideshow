@@ -81,7 +81,7 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	private isResizeTicking = false;
 	private isSlidesTicking = false;
 	private navigation: Navigation;
-	private observer?: ResizeObserver;
+	private observer!: ResizeObserver;
 	private skipLayout = false;
 	private slideOrder = 0;
 	private slides: Slide[] = [];
@@ -98,13 +98,7 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	}
 
 	public componentDidMount() {
-		if (typeof ResizeObserver === 'function') {
-			this.observer = new ResizeObserver(this.onResize);
-		}
-		else {
-			window.addEventListener('resize', this.onResize, { passive: true });
-		}
-
+		this.observer = new ResizeObserver(this.onResize);
 		this.updateLayout();
 	}
 
@@ -113,13 +107,8 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	}
 
 	public componentWillUnmount() {
-		if (this.observer) {
-			this.observer.disconnect();
-			this.observer = undefined;
-		}
-		else {
-			window.removeEventListener('resize', this.onResize);
-		}
+		this.observer.disconnect();
+		this.observer = null!;
 	}
 
 	public render(): ReactNode {
@@ -155,20 +144,13 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	/** @internal */
 	public setViewport(viewport: HTMLElement | null) {
 		if (this.viewport) {
-			if (this.observer) {
-				this.observer.unobserve(this.viewport);
-			}
+			this.observer.unobserve(this.viewport);
 		}
 
 		this.viewport = viewport;
 		if (viewport) {
-			if (this.observer) {
-				// fires onResize automatically
-				this.observer.observe(viewport);
-			}
-			else {
-				this.onResize();
-			}
+			// fires onResize automatically
+			this.observer.observe(viewport);
 		}
 	}
 

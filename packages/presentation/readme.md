@@ -36,7 +36,8 @@ Currently there are two options:
 - `ManualPresentation` - exposes a `position` prop which you can use to control
   the presentation from code
 
-You can also extend the abstract `PresentationBase` class to add your own logic.
+You can also extend the abstract `PresentationBase` class to implement your own
+logic.
 
 ### Viewport Component
 
@@ -81,7 +82,7 @@ the individual phases of a slide. Each value ranges from zero to one
 Example usage:
 
 ```tsx
-import { useProgression } from '@calmdownval/presentation';
+import { Progression, useProgression } from '@calmdownval/presentation';
 import React from 'react';
 
 export const MyComponent = () => {
@@ -104,7 +105,7 @@ be used to scroll to a specific slide programmatically.
 
 ## Example
 
-This example shows a super simple presentation 
+This example shows a super simple presentation
 
 ```tsx
 import { ScrollPresentation, Slide, SlideComponentProps, Viewport } from '@calmdownval/presentation';
