@@ -6,12 +6,12 @@
 	],
 	"devDependencies": {
 		"@calmdownval/eslint-config": "1.0.1",
-		"@calmdownval/eslint-import-resolver-typescript": "1.0.0",
-		"@typescript-eslint/eslint-plugin": "4.29.3",
-		"@typescript-eslint/parser": "4.29.3",
-		"eslint": "7.32.0",
-		"eslint-plugin-import": "2.24.2",
-		"typescript": "4.4.2"
+		"@calmdownval/eslint-import-resolver-typescript": "1.1.0",
+		"@typescript-eslint/eslint-plugin": "5.8.1",
+		"@typescript-eslint/parser": "5.8.1",
+		"eslint": "8.5.0",
+		"eslint-plugin-import": "2.25.3",
+		"typescript": "4.5.4"
 	},
 	"scripts": {
 		"lint": "eslint ./packages/*/src/**/*.{ts,tsx}"
