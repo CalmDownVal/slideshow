@@ -33,7 +33,10 @@ export default [
 			}
 		],
 		plugins: [
-			deleteBeforeBuild({ targets: './build/*' }),
+			deleteBeforeBuild({
+				targets: './build/*',
+				runOnce: true
+			}),
 			typescript(),
 			externals({
 				peerDeps: true
@@ -43,7 +46,7 @@ export default [
 	{
 		input: './src/index.ts',
 		output: {
-			file: `./build/index.d.ts`,
+			file: './build/index.d.ts',
 			format: 'es'
 		},
 		plugins: [

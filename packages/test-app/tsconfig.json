@@ -1,7 +1,6 @@
 {
 	"compilerOptions": {
 		"baseUrl": "./src",
-		"charset": "utf8",
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"isolatedModules": true,

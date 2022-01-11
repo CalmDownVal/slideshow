@@ -16,7 +16,10 @@ export default {
 		sourcemap: true
 	},
 	plugins: [
-		deleteBeforeBuild(),
+		deleteBeforeBuild({
+			targets: './build/*',
+			runOnce: true
+		}),
 		postcss({
 			extract: 'style.css'
 		}),
