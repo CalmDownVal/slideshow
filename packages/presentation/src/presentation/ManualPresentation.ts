@@ -17,6 +17,14 @@ export class ManualPresentation extends PresentationBase<ManualPresentationProps
 		);
 	}
 
+	public shouldComponentUpdate(next: ManualPresentationProps) {
+		const prev = this.props;
+		return (
+			next.position !== prev.position ||
+			super.shouldComponentUpdate(next)
+		);
+	}
+
 	public render() {
 		this.position = this.props.position / UNIT * this.scrollLength;
 		return super.render();

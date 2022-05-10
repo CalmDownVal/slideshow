@@ -1,6 +1,6 @@
-# React Presentations
+# Preact Presentations
 
-A tiny (~ 10kB) library for scroll presentations with React. For more
+A small (~ 10kB) library for scroll presentations with Preact. For more
 information, please have a look at [the readme file](packages/presentation/) of
 the presentation package.
 

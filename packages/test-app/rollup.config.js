@@ -6,6 +6,7 @@ import deleteBeforeBuild from 'rollup-plugin-delete';
 import livereload from 'rollup-plugin-livereload';
 import postcss from 'rollup-plugin-postcss';
 import serve from 'rollup-plugin-serve';
+import sourcemaps from 'rollup-plugin-sourcemaps';
 
 // eslint-disable-next-line import/no-default-export
 export default {
@@ -28,6 +29,7 @@ export default {
 		nodeResolve({
 			browser: true
 		}),
+		sourcemaps(),
 		replace({
 			'process.env.NODE_ENV': "'development'",
 			'preventAssignment': true

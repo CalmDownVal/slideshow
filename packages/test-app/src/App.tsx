@@ -1,5 +1,5 @@
 import { ScrollPresentation, Slide, Viewport } from '@calmdownval/presentation';
-import React from 'react';
+import { h } from 'preact';
 
 import { Navigation } from '~/components/Navigation/Navigation';
 import { Transitions } from '~/components/Transitions/Transitions';

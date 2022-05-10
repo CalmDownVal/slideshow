@@ -9,7 +9,7 @@ export function createFilter<T extends string = string>(list: readonly T[]) {
 	return filter;
 }
 
-export function filterProps<TProps, TFilter extends string = string>(props: TProps, filter: Filter<TFilter>) {
+export function excludeProps<TProps, TFilter extends string = string>(props: TProps, filter: Filter<TFilter>) {
 	const filtered = {} as { -readonly [K in keyof TProps]: K extends TFilter ? TProps[K] | undefined : TProps[K] };
 	for (const key in props) {
 		if (filter[key as never] === true) {

@@ -1,5 +1,5 @@
 import { useProgression } from '@calmdownval/presentation';
-import React from 'react';
+import { h } from 'preact';
 
 import { Progress } from '~/components/Progress/Progress';
 

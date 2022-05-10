@@ -11,7 +11,7 @@ export * from '~/hooks/useProgression';
 
 export * from '~/utils/animation';
 export * from '~/utils/constants';
-export * from '~/utils/filterProps';
+export * from '~/utils/excludeProps';
 export * from '~/utils/math';
 export * from '~/utils/mergeSort';
 export * from '~/utils/style';

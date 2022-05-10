@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext } from 'preact/hooks';
 
 import type { Navigation } from '~/presentation/Navigation';
 import { PresentationContext } from '~/presentation/PresentationBase';

@@ -1,10 +1,10 @@
-# React Presentations
+# Preact Presentations
 
-A tiny (~ 10kB) library for scroll presentations with React.
+A small (~ 10kB) library for scroll presentations with Preact.
 
 ## Installation
 
-Built for React v17.
+Built for Preact v10.
 
 You can install this package using NPM or Yarn. It already contains its own
 typings and needs no additional dependencies to use with TypeScript.
@@ -83,7 +83,7 @@ Example usage:
 
 ```tsx
 import { Progression, useProgression } from '@calmdownval/presentation';
-import React from 'react';
+import { h } from 'preact';
 
 export const MyComponent = () => {
   const phase = useProgression();
@@ -109,7 +109,7 @@ This example shows a super simple presentation
 
 ```tsx
 import { ScrollPresentation, Slide, SlideComponentProps, Viewport } from '@calmdownval/presentation';
-import React from 'react';
+import { h } from 'preact';
 
 import '@calmdownval/presentation/style.css';
 

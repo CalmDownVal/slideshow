@@ -1,12 +1,12 @@
-import { Component, createElement, HTMLAttributes, ReactNode, RefAttributes } from 'react';
+import { ClassAttributes, Component, h } from 'preact';
 
 import type { Navigation } from '~/presentation/Navigation';
 import { PresentationContext } from '~/presentation/PresentationBase';
-import { createFilter, filterProps } from '~/utils/filterProps';
+import { createFilter, excludeProps } from '~/utils/excludeProps';
 import { bem, cx } from '~/utils/style';
 import type { OptionalsOf } from '~/utils/types';
 
-export interface ViewportProps extends HTMLAttributes<HTMLElement> {
+export interface ViewportProps extends h.JSX.HTMLAttributes<HTMLElement> {
 	readonly scrollable?: boolean;
 	readonly tagName?: string;
 }
@@ -20,12 +20,12 @@ const OWN_PROPS = createFilter<keyof ViewportProps>([
 export class Viewport extends Component<ViewportProps> {
 	declare public context: Navigation | null;
 
-	public render(): ReactNode {
+	public render() {
 		if (!this.context) {
 			throw new Error('<Viewport /> can only be used within a <Presentation />');
 		}
 
-		const props = filterProps<ViewportProps & RefAttributes<HTMLDivElement>>(this.props, OWN_PROPS);
+		const props = excludeProps<ViewportProps & ClassAttributes<HTMLDivElement>>(this.props, OWN_PROPS);
 		const { isHorizontal } = this.context.presentation;
 
 		props.ref = this.onViewportRef;
@@ -38,13 +38,13 @@ export class Viewport extends Component<ViewportProps> {
 			this.props.className
 		);
 
-		return createElement(
+		return h(
 			this.props.tagName as 'div',
-			props,
+			props as any,
 			this.props.children,
-			createElement('div', {
+			h('div', {
 				className: 'cdv-presentation__expander',
-				ref: this.onExpanderRef
+				ref: this.onExpanderRef as any
 			})
 		);
 	}

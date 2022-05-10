@@ -7,9 +7,6 @@
 	"env": {
 		"browser": true
 	},
-	"globals": {
-		"JSX": "readonly"
-	},
 	"parserOptions": {
 		"project": "./packages/*/tsconfig.json"
 	},
@@ -19,60 +16,5 @@
 				"project": "./packages/*/tsconfig.json"
 			}
 		}
-	},
-	"rules": {
-		"import/default": "off",
-
-		// extended to allow PascalCase for React components
-		"@typescript-eslint/naming-convention": [
-			"warn",
-			// force camelCase for all values
-			{
-				"selector": [ "default" ],
-				"format": [ "camelCase", "PascalCase" ],
-				"leadingUnderscore": "forbid",
-				"trailingUnderscore": "forbid"
-			},
-
-			// force PascalCase for all types
-			{
-				"selector": [ "typeLike" ],
-				"format": [ "PascalCase" ]
-			},
-
-			// override to allow _ and __ prefixes for values
-			{
-				"selector": [ "variableLike", "memberLike" ],
-				"format": [ "camelCase", "PascalCase" ],
-				"leadingUnderscore": "allowSingleOrDouble"
-			},
-
-			// override for global and static member constants
-			{
-				"selector": [ "variableLike" ],
-				"modifiers": [ "const", "global" ],
-				"format": [ "camelCase", "PascalCase", "UPPER_CASE" ],
-				"leadingUnderscore": "forbid"
-			},
-			{
-				"selector": [ "memberLike" ],
-				"modifiers": [ "static" ],
-				"format": [ "camelCase", "PascalCase", "UPPER_CASE" ]
-			},
-
-			// force PascalCase for enums
-			{
-				"selector": [ "enumMember" ],
-				"format": [ "PascalCase" ],
-				"leadingUnderscore": "forbid"
-			},
-
-			// allow exotic naming when in quotes (useful for http headers etc.)
-			{
-				"selector": [ "objectLiteralProperty" ],
-				"modifiers": [ "requiresQuotes" ],
-				"format": null
-			}
-		]
 	}
 }

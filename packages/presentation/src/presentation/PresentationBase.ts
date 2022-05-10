@@ -1,4 +1,4 @@
-import { createContext, createElement, PureComponent, ReactNode } from 'react';
+import { createContext, Component, h } from 'preact';
 
 import { Navigation, NavigationSlideInfo } from '~/presentation/Navigation';
 import { ProgressionOffset } from '~/presentation/Progression';
@@ -10,53 +10,6 @@ import { px } from '~/utils/style';
 import type { OptionalsOf } from '~/utils/types';
 
 import type { Slide } from './Slide';
-
-interface SlideLayout {
-	readonly slide: Slide;
-	isClipped: boolean;
-	isDocked: boolean;
-	isVisible: boolean;
-	position: number;
-	scrollToOffset: number;
-	visibilityScore: number;
-}
-
-function byOrderAsc(a: Slide, b: Slide) {
-	return a.order - b.order;
-}
-
-function solveProgression(layout: SlideLayout, position: number, dockShift: number) {
-	const { dock, length } = layout.slide.props;
-
-	const maxLength = Math.min(length!, UNIT);
-	const visibleLength = clamp(
-		layout.isDocked && layout.position > dockShift
-			? UNIT - layout.position + dockShift
-			: layout.position > position
-				? position + UNIT - layout.position
-				: layout.position + length! + (layout.isDocked ? dock! : 0) - position,
-		0,
-		maxLength
-	);
-
-	layout.visibilityScore = visibleLength / maxLength;
-	if (visibleLength < maxLength) {
-		return layout.position + dockShift > position
-			? ProgressionOffset.Appear + layout.visibilityScore
-			: ProgressionOffset.Disappear + 1 - layout.visibilityScore;
-	}
-
-	const totalScrollLength = Math.abs(UNIT - length!) + dock!;
-	if (totalScrollLength === 0) {
-		return ProgressionOffset.Disappear;
-	}
-
-	const mainStart = layout.isDocked && layout.position > dockShift
-		? position - dockShift + (layout.position - Math.max(UNIT - maxLength, 0))
-		: layout.position - Math.max(UNIT - maxLength, 0);
-
-	return ProgressionOffset.Main + Math.max(position - mainStart, 0) / totalScrollLength;
-}
 
 export enum Direction {
 	TopToBottom,
@@ -71,7 +24,7 @@ export interface PresentationBaseProps {
 
 export const PresentationContext = createContext<Navigation | null>(null);
 
-export abstract class PresentationBase<TProps extends PresentationBaseProps = PresentationBaseProps> extends PureComponent<TProps> {
+export abstract class PresentationBase<TProps extends PresentationBaseProps = PresentationBaseProps> extends Component<TProps> {
 	protected position = 0;
 	protected viewport: HTMLElement | null = null;
 	protected clientLength = 0;
@@ -91,6 +44,7 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 
 		// must be within a constructor, otherwise `this` references Window when using CJS
 		this.navigation = new Navigation(this, -1, []);
+		this.observer = new ResizeObserver(this.onResize);
 	}
 
 	public get isHorizontal() {
@@ -98,7 +52,6 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	}
 
 	public componentDidMount() {
-		this.observer = new ResizeObserver(this.onResize);
 		this.updateLayout();
 	}
 
@@ -111,12 +64,19 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 		this.observer = null!;
 	}
 
-	public render(): ReactNode {
-		return createElement(
-			PresentationContext.Provider,
-			{ value: this.navigation },
-			this.props.children
+	public shouldComponentUpdate(next: TProps) {
+		const prev = this.props;
+		return (
+			next.tagName !== prev.tagName ||
+			next.direction !== prev.direction
 		);
+	}
+
+	public render() {
+		return h(PresentationContext.Provider, {
+			value: this.navigation,
+			children: this.props.children
+		});
 	}
 
 	public abstract scrollTo(offset: number, animationOptions?: JSAnimationOptions): JSAnimation | void;
@@ -297,7 +257,7 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 			const nextScrollLength = isHorizontal ? viewport.scrollWidth : viewport.scrollHeight;
 			if (this.clientLength !== nextClientLength || this.scrollLength !== nextScrollLength) {
 				this.clientLength = nextClientLength;
-				this.clientLength = nextScrollLength;
+				this.scrollLength = nextScrollLength;
 				this.forceUpdate();
 			}
 		}
@@ -308,4 +268,51 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 		direction: Direction.TopToBottom,
 		tagName: 'div'
 	};
+}
+
+interface SlideLayout {
+	readonly slide: Slide;
+	isClipped: boolean;
+	isDocked: boolean;
+	isVisible: boolean;
+	position: number;
+	scrollToOffset: number;
+	visibilityScore: number;
+}
+
+function solveProgression(layout: SlideLayout, position: number, dockShift: number) {
+	const { dock, length } = layout.slide.props;
+
+	const maxLength = Math.min(length!, UNIT);
+	const visibleLength = clamp(
+		layout.isDocked && layout.position > dockShift
+			? UNIT - layout.position + dockShift
+			: layout.position > position
+				? position + UNIT - layout.position
+				: layout.position + length! + (layout.isDocked ? dock! : 0) - position,
+		0,
+		maxLength
+	);
+
+	layout.visibilityScore = visibleLength / maxLength;
+	if (visibleLength < maxLength) {
+		return layout.position + dockShift > position
+			? ProgressionOffset.Appear + layout.visibilityScore
+			: ProgressionOffset.Disappear + 1 - layout.visibilityScore;
+	}
+
+	const totalScrollLength = Math.abs(UNIT - length!) + dock!;
+	if (totalScrollLength === 0) {
+		return ProgressionOffset.Disappear;
+	}
+
+	const mainStart = layout.isDocked && layout.position > dockShift
+		? position - dockShift + (layout.position - Math.max(UNIT - maxLength, 0))
+		: layout.position - Math.max(UNIT - maxLength, 0);
+
+	return ProgressionOffset.Main + Math.max(position - mainStart, 0) / totalScrollLength;
+}
+
+function byOrderAsc(a: Slide, b: Slide) {
+	return a.order - b.order;
 }

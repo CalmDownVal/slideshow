@@ -1,27 +1,22 @@
 {
 	"compilerOptions": {
 		"baseUrl": "./src",
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"isolatedModules": true,
 		"lib": [
-			"dom",
-			"dom.iterable",
-			"esnext"
+			"DOM",
+			"ESNext"
 		],
-		"module": "esnext",
-		"moduleResolution": "node",
-		"newLine": "lf",
+		"module": "ESNext",
+		"moduleResolution": "Node",
 		"paths": {
 			"~/*": [
 				"*"
 			]
 		},
 		"skipLibCheck": true,
-		"stripInternal": true,
 		"strict": true,
-		"target": "esnext",
-		"types": []
+		"stripInternal": true,
+		"types": [],
+		"target": "ESNext"
 	},
 	"include": [
 		"./src/**/*"
