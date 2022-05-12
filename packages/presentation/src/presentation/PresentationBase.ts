@@ -34,7 +34,7 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	private isResizeTicking = false;
 	private isSlidesTicking = false;
 	private navigation: Navigation;
-	private observer!: ResizeObserver;
+	private observer?: ResizeObserver;
 	private skipLayout = false;
 	private slideOrder = 0;
 	private slides: Slide[] = [];
@@ -60,8 +60,8 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	}
 
 	public componentWillUnmount() {
-		this.observer.disconnect();
-		this.observer = null!;
+		this.observer?.disconnect();
+		this.observer = undefined;
 	}
 
 	public shouldComponentUpdate(next: TProps) {
@@ -104,13 +104,13 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	/** @internal */
 	public setViewport(viewport: HTMLElement | null) {
 		if (this.viewport) {
-			this.observer.unobserve(this.viewport);
+			this.observer?.disconnect();
 		}
 
 		this.viewport = viewport;
 		if (viewport) {
 			// fires onResize automatically
-			this.observer.observe(viewport);
+			this.observer?.observe(viewport);
 		}
 	}
 
