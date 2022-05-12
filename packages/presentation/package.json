@@ -1,7 +1,7 @@
 {
 	"name": "@calmdownval/presentation",
 	"description": "Preact scroll presentations",
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"license": "ISC",
 	"main": "./build/index.cjs.min.js",
 	"module": "./build/index.esm.min.mjs",

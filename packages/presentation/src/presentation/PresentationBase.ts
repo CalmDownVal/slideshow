@@ -161,8 +161,8 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 				visibilityScore: 0
 			};
 
+			const overlap = position - offsetDockLower - offsetLength;
 			if (isVisible && !isDocked && dock! > 0) {
-				const overlap = position - offsetDockLower - offsetLength;
 				if (overlap > dock!) {
 					layout.position += dock!;
 				}
@@ -177,7 +177,7 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 			if (foundVisible) {
 				offsetDockUpper += dock!;
 			}
-			else {
+			else if (overlap >= 0) {
 				offsetDockLower += dock!;
 			}
 
