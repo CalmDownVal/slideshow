@@ -22,6 +22,7 @@
 .cdv-presentation__slide,
 .cdv-presentation__expander {
 	position: absolute;
+	display: inline-block;
 }
 
 .cdv-presentation__slide--docked {
@@ -32,12 +33,14 @@
 .cdv-presentation__viewport--horizontal > .cdv-presentation__expander {
 	top: 0;
 	bottom: 0;
+	height: 100%;
 }
 
 .cdv-presentation__viewport--vertical > .cdv-presentation__slide,
 .cdv-presentation__viewport--vertical > .cdv-presentation__expander {
 	left: 0;
 	right: 0;
+	width: 100%;
 }
 
 .cdv-animated {

@@ -1,6 +1,5 @@
 .transitions {
 	position: relative;
-	background: linear-gradient(to bottom, rgba(0, 0, 0, .5) 1px, transparent 0);
 	height: 100%;
 	display: flex;
 	flex-direction: column;
@@ -14,4 +13,12 @@
 	top: 5rem;
 	right: 1rem;
 	margin: 0;
+}
+
+.cdv-presentation__viewport--horizontal .transitions {
+	background: linear-gradient(to left, rgba(0, 0, 0, .5) 1px, transparent 0);
+}
+
+.cdv-presentation__viewport--vertical .transitions {
+	background: linear-gradient(to top, rgba(0, 0, 0, .5) 1px, transparent 0);
 }
