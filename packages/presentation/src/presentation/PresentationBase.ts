@@ -19,6 +19,8 @@ export enum Direction {
 export interface PresentationBaseProps {
 	readonly clipThreshold?: number;
 	readonly direction?: Direction;
+	readonly paddingStart?: number;
+	readonly paddingEnd?: number;
 	readonly tagName?: string;
 }
 
@@ -126,7 +128,7 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 		}
 
 		const { expander, isHorizontal, slides } = this;
-		const { clipThreshold } = this.props;
+		const { clipThreshold, paddingStart, paddingEnd } = this.props;
 		const axisPosition = isHorizontal ? 'left' : 'top';
 		const axisLength = isHorizontal ? 'width' : 'height';
 
@@ -137,7 +139,7 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 
 		let offsetDockLower = 0;
 		let offsetDockUpper = 0;
-		let offsetLength = 0;
+		let offsetLength = paddingStart!;
 		let dockShift = 0;
 
 		for (let foundVisible = false, isDocked = false, i = 0; i < layouts.length; ++i) {
@@ -187,8 +189,15 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 		// We now know the total length of our slides.
 		// Adjust the expander to always preserve the correct scrollLength
 		if (expander) {
+			const totalLength =
+				offsetDockLower +
+				offsetDockUpper +
+				offsetLength +
+				paddingStart! +
+				paddingEnd!;
+
 			expander.style[axisLength] = '1px';
-			expander.style[axisPosition] = px((offsetDockLower + offsetDockUpper + offsetLength) * ratio - 1);
+			expander.style[axisPosition] = px(totalLength * ratio - 1);
 		}
 
 		// 2nd pass: solve progression and dispatch state changes
@@ -266,6 +275,8 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	public static readonly defaultProps: OptionalsOf<PresentationBaseProps> = {
 		clipThreshold: UNIT / 3,
 		direction: Direction.TopToBottom,
+		paddingStart: 0,
+		paddingEnd: 0,
 		tagName: 'div'
 	};
 }
