@@ -10,12 +10,12 @@ export interface ProgressProps {
 
 export function Progress({ label, value }: ProgressProps) {
 	return (
-		<div className='progress'>
-			<span className='progress__label'>
+		<div class='progress'>
+			<span class='progress__label'>
 				{label}
 			</span>
-			<div className='progress__wrapper'>
-				<div className='progress__indicator' style={Progression.animate('progress-scale', value)} />
+			<div class='progress__wrapper'>
+				<div class='progress__indicator' style={Progression.animate('progress-scale', value)} />
 			</div>
 		</div>
 	);

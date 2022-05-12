@@ -12,8 +12,8 @@ export interface TransitionsProps {
 export function Transitions({ metadata }: TransitionsProps) {
 	const progression = useProgression();
 	return (
-		<div className='transitions'>
-			<h2 className='transitions__header'>
+		<div class='transitions'>
+			<h2 class='transitions__header'>
 				{metadata}
 			</h2>
 			<Progress value={progression.appear} label='Appear' />

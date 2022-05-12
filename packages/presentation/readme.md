@@ -89,7 +89,7 @@ export const MyComponent = () => {
   const phase = useProgression();
   return (
     <div
-      className='my-component'
+      class='my-component'
       style={Progression.animate('animation-name', phase.main)}
     />
   );

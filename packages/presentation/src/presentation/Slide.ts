@@ -74,12 +74,12 @@ export class Slide<TMeta = any> extends Component<SlideProps<TMeta>, SlideState>
 		}
 
 		const props = excludeProps(this.props, OWN_PROPS);
-		props.className = cx(
+		props.class = cx(
 			bem('cdv-presentation__slide', {
 				docked: this.state.isDocked,
 				visible: this.state.isVisible
 			}),
-			this.props.className
+			this.props.class
 		);
 
 		props.style = typeof this.props.style === 'object'

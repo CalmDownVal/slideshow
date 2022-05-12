@@ -29,13 +29,13 @@ export class Viewport extends Component<ViewportProps> {
 		const { isHorizontal } = this.context.presentation;
 
 		props.ref = this.onViewportRef;
-		props.className = cx(
+		props.class = cx(
 			bem('cdv-presentation__viewport', {
 				horizontal: isHorizontal,
 				vertical: !isHorizontal,
 				scrollable: this.props.scrollable
 			}),
-			this.props.className
+			this.props.class
 		);
 
 		return h(
@@ -43,8 +43,8 @@ export class Viewport extends Component<ViewportProps> {
 			props as any,
 			this.props.children,
 			h('div', {
-				className: 'cdv-presentation__expander',
-				ref: this.onExpanderRef as any
+				'class': 'cdv-presentation__expander',
+				'ref': this.onExpanderRef as any
 			})
 		);
 	}
