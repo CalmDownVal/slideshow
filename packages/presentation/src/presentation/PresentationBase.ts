@@ -17,15 +17,16 @@ export enum Direction {
 }
 
 export interface PresentationBaseProps {
+	// must not change after mounting:
 	readonly clipThreshold?: number;
 	readonly direction?: Direction;
 	readonly dockOffset?: number;
-	readonly tagName?: string;
 }
 
 export const PresentationContext = createContext<Navigation | null>(null);
 
-export abstract class PresentationBase<TProps extends PresentationBaseProps = PresentationBaseProps> extends Component<TProps> {
+export abstract class PresentationBase<TProps extends PresentationBaseProps = PresentationBaseProps, TState = {}>
+	extends Component<TProps, TState> {
 	// in presentation units
 	protected position = 0;
 
@@ -78,12 +79,8 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 		this.observer = undefined;
 	}
 
-	public shouldComponentUpdate(next: TProps) {
-		const prev = this.props;
-		return (
-			next.tagName !== prev.tagName ||
-			next.direction !== prev.direction
-		);
+	public shouldComponentUpdate(_next: TProps) {
+		return false;
 	}
 
 	public render() {
@@ -168,13 +165,13 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 			this.isSlidesDirty = false;
 		}
 
+
 	};
 
 	public static readonly defaultProps: OptionalsOf<PresentationBaseProps> = {
 		clipThreshold: UNIT / 3,
 		direction: Direction.TopToBottom,
-		dockOffset: 0,
-		tagName: 'div'
+		dockOffset: 0
 	};
 }
 

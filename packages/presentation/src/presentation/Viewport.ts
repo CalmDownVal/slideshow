@@ -14,6 +14,10 @@ export interface ViewportProps {
 export class Viewport extends Component<ViewportProps> {
 	declare public context: Navigation | null;
 
+	public shouldComponentUpdate() {
+		return false;
+	}
+
 	public render() {
 		if (!this.context) {
 			throw new Error('<Viewport /> can only be used within a <Presentation />');

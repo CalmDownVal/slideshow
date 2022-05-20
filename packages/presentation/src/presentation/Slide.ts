@@ -13,14 +13,16 @@ export interface SlideComponentProps<TMeta = any> {
 }
 
 export interface SlideProps<TMeta = any>{
+	readonly metadata?: TMeta;
+	readonly tagProps?: Omit<h.JSX.HTMLAttributes<HTMLElement>, 'children'>;
+
+	// must not change after mounting:
 	readonly component: ComponentType<SlideComponentProps<TMeta>>;
 	readonly dock?: number;
 	readonly length?: number;
-	readonly metadata?: TMeta;
 	readonly order?: number;
 	readonly persist?: boolean;
 	readonly tagName?: string;
-	readonly tagProps?: Omit<h.JSX.HTMLAttributes<HTMLElement>, 'children'>;
 }
 
 export interface SlideState {
@@ -63,6 +65,20 @@ export class Slide<TMeta = any> extends Component<SlideProps<TMeta>, SlideState>
 	public componentWillUnmount() {
 		this.presentation?.removeSlide(this);
 		this.presentation = null;
+	}
+
+	public shouldComponentUpdate(nextProps: SlideProps<TMeta>, nextState: SlideState) {
+		const prevProps = this.props;
+		const prevState = this.state;
+		return (
+			nextState.progressionValue !== prevState.progressionValue ||
+			nextState.layout !== prevState.layout ||
+			nextState.isClipped !== prevState.isClipped ||
+			nextState.isDocked !== prevState.isDocked ||
+			nextState.isVisible !== prevState.isVisible ||
+			nextProps.metadata !== prevProps.metadata ||
+			nextProps.tagProps !== prevProps.tagProps
+		);
 	}
 
 	public render() {
