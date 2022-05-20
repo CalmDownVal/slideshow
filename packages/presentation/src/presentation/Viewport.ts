@@ -1,21 +1,15 @@
-import { ClassAttributes, Component, h } from 'preact';
+import { Component, h } from 'preact';
 
 import type { Navigation } from '~/presentation/Navigation';
 import { PresentationContext } from '~/presentation/PresentationBase';
-import { createFilter, excludeProps } from '~/utils/excludeProps';
 import { bem, cx } from '~/utils/style';
 import type { OptionalsOf } from '~/utils/types';
 
-export interface ViewportProps extends h.JSX.HTMLAttributes<HTMLElement> {
+export interface ViewportProps {
 	readonly scrollable?: boolean;
 	readonly tagName?: string;
+	readonly tagProps?: Omit<h.JSX.HTMLAttributes<HTMLElement>, 'children'>;
 }
-
-const OWN_PROPS = createFilter<keyof ViewportProps>([
-	'children',
-	'scrollable',
-	'tagName'
-]);
 
 export class Viewport extends Component<ViewportProps> {
 	declare public context: Navigation | null;
@@ -25,8 +19,8 @@ export class Viewport extends Component<ViewportProps> {
 			throw new Error('<Viewport /> can only be used within a <Presentation />');
 		}
 
-		const props = excludeProps<ViewportProps & ClassAttributes<HTMLDivElement>>(this.props, OWN_PROPS);
 		const { isHorizontal } = this.context.presentation;
+		const props = this.props.tagProps ? { ...this.props.tagProps } : {};
 
 		props.ref = this.onViewportRef;
 		props.class = cx(
@@ -35,11 +29,11 @@ export class Viewport extends Component<ViewportProps> {
 				vertical: !isHorizontal,
 				scrollable: this.props.scrollable
 			}),
-			this.props.class
+			props.class
 		);
 
 		return h(
-			this.props.tagName as 'div',
+			this.props.tagName!,
 			props as any,
 			this.props.children,
 			h('div', {

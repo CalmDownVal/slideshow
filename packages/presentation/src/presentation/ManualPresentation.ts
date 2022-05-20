@@ -1,5 +1,3 @@
-import { UNIT } from '~/utils/constants';
-
 import { PresentationBase, PresentationBaseProps } from './PresentationBase';
 
 export interface ManualPresentationProps extends PresentationBaseProps {
@@ -7,27 +5,19 @@ export interface ManualPresentationProps extends PresentationBaseProps {
 }
 
 export class ManualPresentation extends PresentationBase<ManualPresentationProps> {
-	public componentDidUpdate() {
-		super.componentDidUpdate();
-
-		const { isHorizontal, position } = this;
-		this.viewport?.scrollTo(
-			isHorizontal ? position : 0,
-			isHorizontal ? 0 : position
-		);
-	}
-
 	public shouldComponentUpdate(next: ManualPresentationProps) {
-		const prev = this.props;
-		return (
-			next.position !== prev.position ||
-			super.shouldComponentUpdate(next)
-		);
-	}
+		const { position } = next;
+		if (position !== this.props.position) {
+			this.setPosition(position);
 
-	public render() {
-		this.position = this.props.position / UNIT * this.scrollLength;
-		return super.render();
+			const { isHorizontal } = this;
+			this.viewport?.scrollTo(
+				isHorizontal ? this.viewportSize * position : 0,
+				isHorizontal ? 0 : this.viewportSize * position
+			);
+		}
+
+		return super.shouldComponentUpdate(next);
 	}
 
 	public scrollTo() {

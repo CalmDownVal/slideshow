@@ -1,10 +1,8 @@
 import { PresentationBase, PresentationBaseProps } from '~/presentation/PresentationBase';
 import { JSAnimation, JSAnimationOptions, smootherStep } from '~/utils/animation';
-import { UNIT } from '~/utils/constants';
 
 export class ScrollPresentation extends PresentationBase {
 	private readonly animation: JSAnimation;
-	private isScrollTicking = false;
 
 	public constructor(props: PresentationBaseProps) {
 		super(props);
@@ -12,8 +10,8 @@ export class ScrollPresentation extends PresentationBase {
 			position => {
 				const { isHorizontal } = this;
 				this.viewport?.scrollTo(
-					isHorizontal ? position : 0,
-					isHorizontal ? 0 : position
+					isHorizontal ? this.viewportSize * position : 0,
+					isHorizontal ? 0 : this.viewportSize * position
 				);
 
 				this.position = position;
@@ -29,7 +27,7 @@ export class ScrollPresentation extends PresentationBase {
 		this.animation.start({
 			...animationOptions,
 			valueFrom: this.position,
-			valueTo: offset * this.clientLength / UNIT
+			valueTo: offset
 		});
 
 		return this.animation;
@@ -43,21 +41,11 @@ export class ScrollPresentation extends PresentationBase {
 	}
 
 	private readonly onScroll = () => {
-		if (!this.isScrollTicking && !this.animation.isRunning) {
-			requestAnimationFrame(this.onScrollThrottled);
-			this.isScrollTicking = true;
+		if (this.animation.isRunning) {
+			return;
 		}
-	};
 
-	private readonly onScrollThrottled = () => {
-		this.isScrollTicking = false;
-		if (this.viewport) {
-			const nextPosition = this.isHorizontal ? this.viewport.scrollLeft : this.viewport.scrollTop;
-			if (this.position !== nextPosition) {
-				this.position = nextPosition;
-				this.forceUpdate();
-			}
-		}
+		this.setPosition(this.isHorizontal ? this.viewport!.scrollLeft : this.viewport!.scrollTop);
 	};
 
 	public static readonly defaultProps = PresentationBase.defaultProps;
