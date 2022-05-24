@@ -1,6 +1,6 @@
 import { h, RenderableProps } from 'preact';
 
-import { bem, cx } from '~/utils/style';
+import { bem, cx, percent } from '~/utils/style';
 import type { OptionalsOf } from '~/utils/types';
 
 import type { Navigation } from './Navigation';
@@ -59,17 +59,21 @@ export class Viewport extends PresentationResource<ViewportProps> {
 			throw new Error('Viewport can only be used as a descendant of a Presentation.');
 		}
 
+		const { isHorizontal } = this;
 		const { direction } = this.props;
-		const props = this.props.tagProps ? { ...this.props.tagProps } : {};
+		const props = { ...this.props.tagProps };
 
 		props.ref = this.onViewportRef;
 		props.class = cx(
 			bem('cdv-presentation__viewport', {
+				'docked': false, // TODO
+				'scrollable': this.props.scrollable,
+				'horizontal': isHorizontal,
+				'vertical': !isHorizontal,
 				'top-to-bottom': direction === Direction.TopToBottom,
 				'left-to-right': direction === Direction.LeftToRight,
 				'bottom-to-top': direction === Direction.BottomToTop,
-				'right-to-left': direction === Direction.RightToLeft,
-				'scrollable': this.props.scrollable
+				'right-to-left': direction === Direction.RightToLeft
 			}),
 			props.class
 		);
@@ -79,7 +83,8 @@ export class Viewport extends PresentationResource<ViewportProps> {
 			props as any,
 			this.props.children,
 			h('div', {
-				'class': 'cdv-presentation__expander'
+				'class': 'cdv-presentation__expander',
+				'style': `--cdv-expand: ${percent(this.presentation?.presentationLength ?? 1)};`
 			})
 		);
 	}

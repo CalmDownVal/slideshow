@@ -2,6 +2,7 @@ import { UNIT } from '~/utils/constants';
 import { clamp } from '~/utils/math';
 import type { Mutable } from '~/utils/types';
 
+/** @internal */
 export enum ProgressionOffset {
 	Appear = 0,
 	Main = 1,

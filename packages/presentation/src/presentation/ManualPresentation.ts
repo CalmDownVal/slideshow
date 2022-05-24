@@ -6,9 +6,8 @@ export interface ManualPresentationProps extends PresentationBaseProps {
 
 export class ManualPresentation extends PresentationBase<ManualPresentationProps> {
 	public shouldComponentUpdate(next: ManualPresentationProps) {
-		const { position } = next;
-		if (position !== this.props.position) {
-			this.setPosition(position * this.presentationLength);
+		if (next.position !== this.props.position) {
+			this.setPosition(next.position);
 		}
 
 		return super.shouldComponentUpdate(next);

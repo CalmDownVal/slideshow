@@ -54,9 +54,10 @@ export class ScrollPresentation extends PresentationBase {
 	private readonly onScrollThrottled = () => {
 		const { isHorizontal, ref } = this.viewport!;
 		const position = isHorizontal ? 'scrollLeft' : 'scrollTop';
-		const size = isHorizontal ? 'clientWidth' : 'clientHeight';
+		const scrollSize = isHorizontal ? 'scrollWidth' : 'scrollHeight';
+		const layoutSize = isHorizontal ? 'clientWidth' : 'clientHeight';
 
-		this.setPosition(ref![position] / ref![size], true);
+		this.setPosition(ref![position] / (ref![scrollSize] - ref![layoutSize]), true);
 		this.scrollFrame = undefined;
 	};
 

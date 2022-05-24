@@ -26,3 +26,7 @@ export function cx() {
 export function px(length: number) {
 	return Math.round(length) + 'px';
 }
+
+export function percent(length: number) {
+	return Math.round(100.0 * length) + '%';
+}

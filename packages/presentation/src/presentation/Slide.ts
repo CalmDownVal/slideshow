@@ -1,7 +1,7 @@
 import { createContext, ComponentType, h } from 'preact';
 
 import { UNIT } from '~/utils/constants';
-import { bem, cx } from '~/utils/style';
+import { bem, cx, percent } from '~/utils/style';
 import type { OptionalsOf } from '~/utils/types';
 
 import type { Navigation } from './Navigation';
@@ -30,6 +30,7 @@ export interface SlideState {
 	readonly canGetClipped: boolean;
 	readonly isVisible: boolean;
 	readonly position: number;
+	readonly progression: number;
 }
 
 export const ProgressionContext = createContext<Progression | null>(null);
@@ -39,7 +40,8 @@ export class Slide<TMeta = any> extends PresentationResource<SlideProps<TMeta>, 
 	public readonly state: SlideState = {
 		canGetClipped: false,
 		isVisible: false,
-		position: 0
+		position: 0,
+		progression: 0
 	};
 
 	private fallbackOrder?: number;
@@ -84,16 +86,16 @@ export class Slide<TMeta = any> extends PresentationResource<SlideProps<TMeta>, 
 			return null;
 		}
 
-		if (this.progression?.value !== this.state.position) {
+		if (this.progression?.value !== this.state.progression) {
 			this.progression = Progression.create(
-				this.state.position,
+				this.state.progression,
 				this.props.length!,
 				this.props.dock!
 			);
 		}
 
 		const props = this.props.tagProps ? { ...this.props.tagProps } : {};
-		props.style = `--cdv-position:${Math.round(100.0 * this.state.position / UNIT)}%;`;
+		props.style = `--cdv-position: ${percent(this.state.position / UNIT)};`;
 		props.class = cx(
 			bem('cdv-presentation__slide', {
 				visible: this.state.isVisible

@@ -2,6 +2,7 @@ import { createContext, Component, h, RenderableProps } from 'preact';
 
 import { UNIT } from '~/utils/constants';
 import type { JSAnimation, JSAnimationOptions } from '~/utils/JSAnimation';
+import { clamp } from '~/utils/math';
 import { mergeSort } from '~/utils/mergeSort';
 import type { OptionalsOf } from '~/utils/types';
 
@@ -12,23 +13,28 @@ import type { Viewport } from './Viewport';
 export interface PresentationBaseProps {
 	// must not change after mounting:
 	readonly clipThreshold?: number;
-	readonly dockOffset?: number;
+	readonly paddingStart?: number;
+	readonly paddingEnd?: number;
 }
 
 export const PresentationContext = createContext<Navigation | null>(null);
 
 export abstract class PresentationBase<TProps extends PresentationBaseProps = PresentationBaseProps, TState = {}> extends Component<TProps, TState> {
-	protected presentationPosition = 0;
-	protected presentationLength = 0;
-	protected viewport: Viewport | null = null;
+	/** @internal @readonly */
+	public presentationPosition = 0;
 
-	private updateFrame?: number;
+	/** @internal @readonly */
+	public presentationLength = 1;
+
+	/** @internal @readonly */
+	public viewport: Viewport | null = null;
+
 	private isOffsetDirty = false;
 	private isSlidesDirty = false;
-
-	private readonly navigation: Navigation;
+	private navigation: Navigation;
 	private slideOrder = 0;
 	private slides: Slide[] = [];
+	private updateFrame?: number;
 
 	public constructor(props: TProps) {
 		super(props);
@@ -86,8 +92,9 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	}
 
 	protected setPosition(position: number, isFrameAligned = false) {
-		if (position !== this.presentationPosition) {
-			this.presentationPosition = position;
+		const safePosition = clamp(position);
+		if (safePosition !== this.presentationPosition) {
+			this.presentationPosition = safePosition;
 			this.isOffsetDirty = true;
 			this.update(isFrameAligned);
 		}
@@ -117,24 +124,30 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 		}
 
 		if (this.isOffsetDirty) {
-			this.viewport.setOffset(this.presentationPosition / (this.presentationLength - UNIT));
+			this.viewport.setOffset(this.presentationPosition);
 			this.isOffsetDirty = false;
 		}
 
 		if (this.isSlidesDirty) {
 			this.slides = mergeSort(this.slides, byOrderAsc);
-			this.presentationLength = this.slides.reduce(sumLength, 0);
+			this.presentationLength =
+				this.slides.reduce(sumLength, 0) +
+				this.props.paddingStart! +
+				this.props.paddingEnd!;
+
 			this.isSlidesDirty = false;
 		}
 
 		// figure out the current slide and whether it is docked or not
+
 
 		// layout all other slides accordingly
 	};
 
 	public static readonly defaultProps: OptionalsOf<PresentationBaseProps> = {
 		clipThreshold: UNIT / 3,
-		dockOffset: 0
+		paddingStart: 0,
+		paddingEnd: 0
 	};
 }
 

@@ -1,3 +1,6 @@
+/* VIEWPORT
+ ***********/
+
 .cdv-presentation__viewport {
 	position: relative;
 	contain: strict;
@@ -19,29 +22,70 @@
 	overflow: clip scroll;
 }
 
-.cdv-presentation__slide,
-.cdv-presentation__expander {
+
+/* SLIDES
+ *********/
+
+.cdv-presentation__slide {
 	position: absolute;
 	display: inline-block;
 }
 
-.cdv-presentation__slide--docked {
+.cdv-presentation__viewport--docked > .cdv-presentation__slide {
 	position: sticky;
 }
 
-.cdv-presentation__viewport--horizontal > .cdv-presentation__slide,
-.cdv-presentation__viewport--horizontal > .cdv-presentation__expander {
+.cdv-presentation__viewport--horizontal > .cdv-presentation__slide {
 	top: 0;
 	bottom: 0;
 	height: 100%;
 }
 
-.cdv-presentation__viewport--vertical > .cdv-presentation__slide,
-.cdv-presentation__viewport--vertical > .cdv-presentation__expander {
+.cdv-presentation__viewport--left-to-right > .cdv-presentation__slide {
+	left: var(--cdv-position);
+}
+
+.cdv-presentation__viewport--right-to-left > .cdv-presentation__slide {
+	right: var(--cdv-position);
+}
+
+.cdv-presentation__viewport--vertical {
 	left: 0;
 	right: 0;
 	width: 100%;
 }
+
+.cdv-presentation__viewport--top-to-bottom > .cdv-presentation__slide {
+	top: var(--cdv-position);
+}
+
+.cdv-presentation__viewport--bottom-to-top > .cdv-presentation__slide {
+	bottom: var(--cdv-position);
+}
+
+
+/* EXPANDER
+ ***********/
+
+.cdv-presentation__expander {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.cdv-presentation__viewport--horizontal > .cdv-presentation__expander {
+	width: var(--cdv-expand);
+	height: 100%;
+}
+
+.cdv-presentation__viewport--vertical > .cdv-presentation__expander {
+	width: 100%;
+	height: var(--cdv-expand);
+}
+
+
+/* UTILITY
+ **********/
 
 .cdv-animated {
 	animation-duration: 1s;
