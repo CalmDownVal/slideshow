@@ -6,7 +6,7 @@ import { PresentationContext } from '~/presentation/PresentationBase';
 export function useNavigation<TMeta = any>(): Navigation<TMeta> {
 	const navigation = useContext(PresentationContext);
 	if (navigation === null) {
-		throw new Error('useNavigation can only be used within child components of a <Presentation />');
+		throw new Error('useNavigation can only be used within child components of a Presentation.');
 	}
 
 	return navigation;

@@ -1,8 +1,11 @@
-import { PresentationBase, PresentationBaseProps } from '~/presentation/PresentationBase';
 import { JSAnimation, JSAnimationOptions, smootherStep } from '~/utils/JSAnimation';
+
+import { PresentationBase, PresentationBaseProps } from './PresentationBase';
+import type { Viewport } from './Viewport';
 
 export class ScrollPresentation extends PresentationBase {
 	private readonly animation: JSAnimation;
+	private scrollFrame?: number;
 
 	public constructor(props: PresentationBaseProps) {
 		super(props);
@@ -10,6 +13,14 @@ export class ScrollPresentation extends PresentationBase {
 			position => this.setPosition(position, true),
 			{ easing: smootherStep }
 		);
+	}
+
+	public componentWillUnmount() {
+		super.componentWillUnmount();
+		if (this.scrollFrame !== undefined) {
+			cancelAnimationFrame(this.scrollFrame);
+			this.scrollFrame = undefined;
+		}
 	}
 
 	public scrollTo(offset: number, animationOptions?: JSAnimationOptions) {
@@ -23,18 +34,30 @@ export class ScrollPresentation extends PresentationBase {
 	}
 
 	/** @internal */
-	public setViewport(viewport: HTMLElement | null) {
-		this.viewport?.removeEventListener('scroll', this.onScroll);
+	public setViewport(viewport: Viewport | null) {
+		const oldRef = this.viewport?.ref;
+		const newRef = viewport?.ref;
+		if (oldRef !== newRef) {
+			oldRef?.removeEventListener('scroll', this.onScroll);
+			newRef?.addEventListener('scroll', this.onScroll, { passive: true });
+		}
+
 		super.setViewport(viewport);
-		viewport?.addEventListener('scroll', this.onScroll, { passive: true });
 	}
 
 	private readonly onScroll = () => {
 		if (!this.animation.isRunning) {
-			this.setPosition(this.isHorizontal
-				? this.viewport!.scrollLeft
-				: this.viewport!.scrollTop);
+			this.scrollFrame ??= requestAnimationFrame(this.onScrollThrottled);
 		}
+	};
+
+	private readonly onScrollThrottled = () => {
+		const { isHorizontal, ref } = this.viewport!;
+		const position = isHorizontal ? 'scrollLeft' : 'scrollTop';
+		const size = isHorizontal ? 'clientWidth' : 'clientHeight';
+
+		this.setPosition(ref![position] / ref![size], true);
+		this.scrollFrame = undefined;
 	};
 
 	public static readonly defaultProps = PresentationBase.defaultProps;

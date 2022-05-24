@@ -21,8 +21,8 @@ export class JSAnimation implements JSAnimationProps {
 	public valueFrom = 0.0;
 	public valueTo = 1.0;
 
-	private handle: number | null = null;
-	private startTime: number | null = null;
+	private handle?: number;
+	private startTime?: number;
 
 	public constructor(
 		private readonly callback: JSAnimationCallback,
@@ -32,20 +32,20 @@ export class JSAnimation implements JSAnimationProps {
 	}
 
 	public get isRunning() {
-		return this.handle !== null;
+		return this.handle !== undefined;
 	}
 
 	public start(options?: JSAnimationOptions) {
 		this.stop();
 		Object.assign(this, options);
-		this.startTime = null;
+		this.startTime = undefined;
 		this.handle = requestAnimationFrame(this.onTick);
 	}
 
 	public stop() {
-		if (this.handle !== null) {
+		if (this.handle !== undefined) {
 			cancelAnimationFrame(this.handle);
-			this.handle = null;
+			this.handle = undefined;
 		}
 	}
 
@@ -58,7 +58,7 @@ export class JSAnimation implements JSAnimationProps {
 		this.callback(value);
 		this.handle = progress < 1
 			? requestAnimationFrame(this.onTick)
-			: null;
+			: undefined;
 	};
 
 	public static animate(callback: JSAnimationCallback, options?: JSAnimationOptions) {

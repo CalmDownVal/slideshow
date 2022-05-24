@@ -1,79 +1,46 @@
 import { createContext, Component, h, RenderableProps } from 'preact';
 
-import { Navigation, NavigationSlideInfo } from '~/presentation/Navigation';
-import { ProgressionOffset } from '~/presentation/Progression';
-import type { JSAnimation, JSAnimationOptions } from '~/utils/JSAnimation';
 import { UNIT } from '~/utils/constants';
-import { clamp } from '~/utils/math';
+import type { JSAnimation, JSAnimationOptions } from '~/utils/JSAnimation';
 import { mergeSort } from '~/utils/mergeSort';
-import { px } from '~/utils/style';
 import type { OptionalsOf } from '~/utils/types';
 
+import { Navigation } from './Navigation';
 import type { Slide } from './Slide';
-
-export enum Direction {
-	TopToBottom,
-	LeftToRight
-}
+import type { Viewport } from './Viewport';
 
 export interface PresentationBaseProps {
 	// must not change after mounting:
 	readonly clipThreshold?: number;
-	readonly direction?: Direction;
 	readonly dockOffset?: number;
 }
 
 export const PresentationContext = createContext<Navigation | null>(null);
 
-export abstract class PresentationBase<TProps extends PresentationBaseProps = PresentationBaseProps, TState = {}>
-	extends Component<TProps, TState> {
-	// in presentation units
+export abstract class PresentationBase<TProps extends PresentationBaseProps = PresentationBaseProps, TState = {}> extends Component<TProps, TState> {
 	protected presentationPosition = 0;
 	protected presentationLength = 0;
+	protected viewport: Viewport | null = null;
 
-	// in logical pixels
-	protected viewport: HTMLElement | null = null;
-	protected viewportSize = 0;
-
-	private frame?: number;
-	private isLayoutDirty = true;
+	private updateFrame?: number;
 	private isOffsetDirty = false;
 	private isSlidesDirty = false;
-	private isUpdateScheduled = false;
 
-	private expander: HTMLElement | null = null;
-	private navigation: Navigation;
-	private observer?: ResizeObserver;
+	private readonly navigation: Navigation;
 	private slideOrder = 0;
 	private slides: Slide[] = [];
 
 	public constructor(props: TProps) {
 		super(props);
-
-		// must be within a constructor, otherwise `this` references Window when using CJS
 		this.navigation = new Navigation(this, -1, []);
-		this.observer = new ResizeObserver(() => {
-			this.isLayoutDirty = true;
-			this.update();
-		});
-	}
-
-	public get isHorizontal() {
-		return this.props.direction === Direction.LeftToRight;
 	}
 
 	public componentDidMount() {
 		this.update();
 	}
 
-	public componentDidUpdate() {
-		this.update();
-	}
-
 	public componentWillUnmount() {
 		this.cancelUpdate();
-		this.observer?.disconnect();
-		this.observer = undefined;
 	}
 
 	public shouldComponentUpdate(next: RenderableProps<TProps>) {
@@ -111,28 +78,9 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	}
 
 	/** @internal */
-	public setViewport(viewport: HTMLElement | null) {
-		if (viewport === this.viewport) {
-			return;
-		}
-
-		if (this.viewport) {
-			this.observer?.disconnect();
-		}
-
-		this.viewport = viewport;
-		if (viewport) {
-			this.observer?.observe(viewport);
-		}
-
-		this.isLayoutDirty = true;
-		this.update();
-	}
-
-	/** @internal */
-	public setExpander(expander: HTMLElement | null) {
-		if (expander !== this.expander) {
-			this.expander = expander;
+	public setViewport(viewport: Viewport | null) {
+		if (viewport !== this.viewport) {
+			this.viewport = viewport;
 			this.update();
 		}
 	}
@@ -145,46 +93,31 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 		}
 	}
 
-	protected update(isFrameAligned = false) {
+	private update(isFrameAligned = false) {
 		if (isFrameAligned) {
 			this.cancelUpdate();
 			this.onUpdate();
 			return;
 		}
 
-		if (!this.isUpdateScheduled) {
-			this.frame = requestAnimationFrame(this.onUpdate);
-			this.isUpdateScheduled = true;
-		}
+		this.updateFrame ??= requestAnimationFrame(this.onUpdate);
 	}
 
 	private cancelUpdate() {
-		if (this.isUpdateScheduled) {
-			cancelAnimationFrame(this.frame!);
-			this.isUpdateScheduled = false;
+		if (this.updateFrame !== undefined) {
+			cancelAnimationFrame(this.updateFrame);
+			this.updateFrame = undefined;
 		}
 	}
 
 	private readonly onUpdate = () => {
-		this.isUpdateScheduled = false;
-
-		const { expander, isHorizontal, slides, viewport } = this;
-		const { clipThreshold, dockOffset } = this.props;
-		const axisPosition = isHorizontal ? 'left' : 'top';
-		const axisLength = isHorizontal ? 'width' : 'height';
-
-		if (this.isLayoutDirty && viewport) {
-			this.viewportSize = isHorizontal ? viewport.clientWidth : viewport.clientHeight;
-			this.isLayoutDirty = false;
+		this.updateFrame = undefined;
+		if (!this.viewport) {
+			return;
 		}
 
-		if (this.isOffsetDirty && viewport) {
-			const offset = this.viewportSize * this.presentationPosition;
-			viewport.scrollTo(
-				isHorizontal ? offset : 0,
-				isHorizontal ? 0 : offset
-			);
-
+		if (this.isOffsetDirty) {
+			this.viewport.setOffset(this.presentationPosition / (this.presentationLength - UNIT));
 			this.isOffsetDirty = false;
 		}
 
@@ -194,12 +127,13 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 			this.isSlidesDirty = false;
 		}
 
-		//
+		// figure out the current slide and whether it is docked or not
+
+		// layout all other slides accordingly
 	};
 
 	public static readonly defaultProps: OptionalsOf<PresentationBaseProps> = {
 		clipThreshold: UNIT / 3,
-		direction: Direction.TopToBottom,
 		dockOffset: 0
 	};
 }

@@ -1,6 +1,7 @@
-import type { PresentationBase } from '~/presentation/PresentationBase';
 import type { JSAnimationOptions } from '~/utils/JSAnimation';
 import { clamp } from '~/utils/math';
+
+import type { PresentationBase } from './PresentationBase';
 
 export interface NavigationSlideInfo<TMeta = any> {
 	readonly scrollToOffset: number;

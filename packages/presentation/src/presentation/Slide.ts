@@ -1,12 +1,13 @@
-import { createContext, ComponentType, Component, h } from 'preact';
+import { createContext, ComponentType, h } from 'preact';
 
-import type { Navigation } from '~/presentation/Navigation';
-import { Progression } from '~/presentation/Progression';
 import { UNIT } from '~/utils/constants';
 import { bem, cx } from '~/utils/style';
 import type { OptionalsOf } from '~/utils/types';
 
-import { PresentationBase, PresentationContext } from './PresentationBase';
+import type { Navigation } from './Navigation';
+import type { PresentationBase } from './PresentationBase';
+import { PresentationResource } from './PresentationResource';
+import { Progression } from './Progression';
 
 export interface SlideComponentProps<TMeta = any> {
 	readonly metadata?: TMeta;
@@ -26,27 +27,22 @@ export interface SlideProps<TMeta = any>{
 }
 
 export interface SlideState {
-	readonly isClipped: boolean;
-	readonly isDocked: boolean;
+	readonly canGetClipped: boolean;
 	readonly isVisible: boolean;
-	readonly layout: h.JSX.CSSProperties;
-	readonly progressionValue: number;
+	readonly position: number;
 }
 
 export const ProgressionContext = createContext<Progression | null>(null);
 
-export class Slide<TMeta = any> extends Component<SlideProps<TMeta>, SlideState> {
+export class Slide<TMeta = any> extends PresentationResource<SlideProps<TMeta>, SlideState> {
 	declare public context: Navigation | null;
 	public readonly state: SlideState = {
-		isClipped: true,
-		isDocked: false,
+		canGetClipped: false,
 		isVisible: false,
-		layout: {},
-		progressionValue: 0
+		position: 0
 	};
 
-	private fallbackOrder: number | null = null;
-	private presentation: PresentationBase | null = null;
+	private fallbackOrder?: number;
 	private progression: Progression | null = null;
 
 	/** @internal */
@@ -54,15 +50,8 @@ export class Slide<TMeta = any> extends Component<SlideProps<TMeta>, SlideState>
 		return this.props.order ?? this.fallbackOrder ?? 0;
 	}
 
-	public componentDidMount() {
-		this.updateRegistration();
-	}
-
-	public componentDidUpdate() {
-		this.updateRegistration();
-	}
-
 	public componentWillUnmount() {
+		super.componentWillUnmount();
 		this.presentation?.removeSlide(this);
 		this.presentation = null;
 	}
@@ -70,55 +59,47 @@ export class Slide<TMeta = any> extends Component<SlideProps<TMeta>, SlideState>
 	public shouldComponentUpdate(nextProps: SlideProps<TMeta>, nextState: SlideState) {
 		const prevProps = this.props;
 		const prevState = this.state;
-		return (
-			nextState.progressionValue !== prevState.progressionValue ||
-			nextState.layout !== prevState.layout ||
-			nextState.isClipped !== prevState.isClipped ||
-			nextState.isDocked !== prevState.isDocked ||
-			nextState.isVisible !== prevState.isVisible ||
-			nextProps.metadata !== prevProps.metadata ||
-			nextProps.tagProps !== prevProps.tagProps
-		);
+
+		if (nextState.isVisible !== prevState.isVisible) {
+			return true;
+		}
+
+		return prevState.isVisible
+			? (
+				nextState.position !== prevState.position ||
+				nextProps.metadata !== prevProps.metadata ||
+				nextProps.tagProps !== prevProps.tagProps
+			)
+			: (
+				nextState.canGetClipped !== prevState.canGetClipped
+			);
 	}
 
 	public render() {
 		if (!this.context) {
-			throw new Error('<Slide /> can only be used within a <Presentation />');
+			throw new Error('Slide can only be used as a descendant of a Presentation.');
 		}
 
-		if ((this.state.isClipped && !this.props.persist) || !this.presentation) {
+		if (!this.presentation || (this.state.canGetClipped && !this.props.persist)) {
 			return null;
 		}
 
+		if (this.progression?.value !== this.state.position) {
+			this.progression = Progression.create(
+				this.state.position,
+				this.props.length!,
+				this.props.dock!
+			);
+		}
+
 		const props = this.props.tagProps ? { ...this.props.tagProps } : {};
+		props.style = `--cdv-position:${Math.round(100.0 * this.state.position / UNIT)}%;`;
 		props.class = cx(
 			bem('cdv-presentation__slide', {
-				docked: this.state.isDocked,
 				visible: this.state.isVisible
 			}),
 			props.class
 		);
-
-		props.style = typeof props.style === 'object'
-			? {
-				...props.style,
-				...this.state.layout
-			}
-			: this.state.layout;
-
-		// Slide would normally be removed from the DOM, but is marked as persistent
-		if (this.state.isClipped) {
-			props.style.visibility = 'hidden';
-		}
-
-		// create a new Progression instance if necessary (updates context)
-		if (this.progression?.value !== this.state.progressionValue) {
-			this.progression = Progression.create(
-				this.state.progressionValue,
-				this.props.dock!,
-				this.props.length!
-			);
-		}
 
 		return h(
 			this.props.tagName!,
@@ -132,22 +113,15 @@ export class Slide<TMeta = any> extends Component<SlideProps<TMeta>, SlideState>
 		);
 	}
 
-	private updateRegistration() {
-		const oldPresentation = this.presentation;
-		const newPresentation = this.context?.presentation;
-		if (oldPresentation === newPresentation) {
-			return;
-		}
-
-		oldPresentation?.removeSlide(this);
-		this.presentation = newPresentation ?? null;
-		if (newPresentation) {
-			this.fallbackOrder = newPresentation.getFallbackOrder();
-			newPresentation.addSlide(this);
+	protected updateRegistration(presentation: PresentationBase | null) {
+		this.presentation?.removeSlide(this);
+		if (presentation) {
+			this.fallbackOrder = presentation.getFallbackOrder();
+			presentation.addSlide(this);
 		}
 	}
 
-	public static readonly contextType = PresentationContext;
+	public static readonly contextType = PresentationResource.contextType;
 	public static readonly defaultProps: OptionalsOf<SlideProps> = {
 		dock: 0,
 		length: UNIT,

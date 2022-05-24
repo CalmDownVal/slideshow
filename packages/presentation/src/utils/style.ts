@@ -24,5 +24,5 @@ export function cx() {
 }
 
 export function px(length: number) {
-	return Math.trunc(length).toFixed(0) + 'px';
+	return Math.round(length) + 'px';
 }
