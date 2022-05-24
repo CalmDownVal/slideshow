@@ -1,5 +1,5 @@
 import type { PresentationBase } from '~/presentation/PresentationBase';
-import type { JSAnimationOptions } from '~/utils/animation';
+import type { JSAnimationOptions } from '~/utils/JSAnimation';
 import { clamp } from '~/utils/math';
 
 export interface NavigationSlideInfo<TMeta = any> {

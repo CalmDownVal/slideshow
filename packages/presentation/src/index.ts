@@ -9,7 +9,7 @@ export * from '~/presentation/Viewport';
 export * from '~/hooks/useNavigation';
 export * from '~/hooks/useProgression';
 
-export * from '~/utils/animation';
+export * from '~/utils/JSAnimation';
 export * from '~/utils/constants';
 export * from '~/utils/math';
 export * from '~/utils/mergeSort';

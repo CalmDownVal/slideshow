@@ -1,8 +1,8 @@
-import { createContext, Component, h } from 'preact';
+import { createContext, Component, h, RenderableProps } from 'preact';
 
 import { Navigation, NavigationSlideInfo } from '~/presentation/Navigation';
 import { ProgressionOffset } from '~/presentation/Progression';
-import type { JSAnimation, JSAnimationOptions } from '~/utils/animation';
+import type { JSAnimation, JSAnimationOptions } from '~/utils/JSAnimation';
 import { UNIT } from '~/utils/constants';
 import { clamp } from '~/utils/math';
 import { mergeSort } from '~/utils/mergeSort';
@@ -28,15 +28,16 @@ export const PresentationContext = createContext<Navigation | null>(null);
 export abstract class PresentationBase<TProps extends PresentationBaseProps = PresentationBaseProps, TState = {}>
 	extends Component<TProps, TState> {
 	// in presentation units
-	protected position = 0;
+	protected presentationPosition = 0;
+	protected presentationLength = 0;
 
 	// in logical pixels
 	protected viewport: HTMLElement | null = null;
-	protected viewportScrollSize = 0;
 	protected viewportSize = 0;
 
 	private frame?: number;
 	private isLayoutDirty = true;
+	private isOffsetDirty = false;
 	private isSlidesDirty = false;
 	private isUpdateScheduled = false;
 
@@ -70,17 +71,13 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 	}
 
 	public componentWillUnmount() {
-		if (this.isUpdateScheduled) {
-			cancelAnimationFrame(this.frame!);
-			this.isUpdateScheduled = false;
-		}
-
+		this.cancelUpdate();
 		this.observer?.disconnect();
 		this.observer = undefined;
 	}
 
-	public shouldComponentUpdate(_next: TProps) {
-		return false;
+	public shouldComponentUpdate(next: RenderableProps<TProps>) {
+		return this.props.children !== next.children;
 	}
 
 	public render() {
@@ -115,6 +112,10 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 
 	/** @internal */
 	public setViewport(viewport: HTMLElement | null) {
+		if (viewport === this.viewport) {
+			return;
+		}
+
 		if (this.viewport) {
 			this.observer?.disconnect();
 		}
@@ -130,20 +131,37 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 
 	/** @internal */
 	public setExpander(expander: HTMLElement | null) {
-		this.expander = expander;
-	}
-
-	protected setPosition(position: number) {
-		if (position !== this.position) {
-			this.position = position;
+		if (expander !== this.expander) {
+			this.expander = expander;
 			this.update();
 		}
 	}
 
-	protected update() {
+	protected setPosition(position: number, isFrameAligned = false) {
+		if (position !== this.presentationPosition) {
+			this.presentationPosition = position;
+			this.isOffsetDirty = true;
+			this.update(isFrameAligned);
+		}
+	}
+
+	protected update(isFrameAligned = false) {
+		if (isFrameAligned) {
+			this.cancelUpdate();
+			this.onUpdate();
+			return;
+		}
+
 		if (!this.isUpdateScheduled) {
 			this.frame = requestAnimationFrame(this.onUpdate);
 			this.isUpdateScheduled = true;
+		}
+	}
+
+	private cancelUpdate() {
+		if (this.isUpdateScheduled) {
+			cancelAnimationFrame(this.frame!);
+			this.isUpdateScheduled = false;
 		}
 	}
 
@@ -160,12 +178,23 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 			this.isLayoutDirty = false;
 		}
 
+		if (this.isOffsetDirty && viewport) {
+			const offset = this.viewportSize * this.presentationPosition;
+			viewport.scrollTo(
+				isHorizontal ? offset : 0,
+				isHorizontal ? 0 : offset
+			);
+
+			this.isOffsetDirty = false;
+		}
+
 		if (this.isSlidesDirty) {
 			this.slides = mergeSort(this.slides, byOrderAsc);
+			this.presentationLength = this.slides.reduce(sumLength, 0);
 			this.isSlidesDirty = false;
 		}
 
-
+		//
 	};
 
 	public static readonly defaultProps: OptionalsOf<PresentationBaseProps> = {
@@ -177,4 +206,8 @@ export abstract class PresentationBase<TProps extends PresentationBaseProps = Pr
 
 function byOrderAsc(a: Slide, b: Slide) {
 	return a.order - b.order;
+}
+
+function sumLength(sum: number, slide: Slide) {
+	return sum + slide.props.length! + slide.props.dock!;
 }

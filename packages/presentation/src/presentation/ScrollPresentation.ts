@@ -1,5 +1,5 @@
 import { PresentationBase, PresentationBaseProps } from '~/presentation/PresentationBase';
-import { JSAnimation, JSAnimationOptions, smootherStep } from '~/utils/animation';
+import { JSAnimation, JSAnimationOptions, smootherStep } from '~/utils/JSAnimation';
 
 export class ScrollPresentation extends PresentationBase {
 	private readonly animation: JSAnimation;
@@ -7,26 +7,15 @@ export class ScrollPresentation extends PresentationBase {
 	public constructor(props: PresentationBaseProps) {
 		super(props);
 		this.animation = new JSAnimation(
-			position => {
-				const { isHorizontal } = this;
-				this.viewport?.scrollTo(
-					isHorizontal ? this.viewportSize * position : 0,
-					isHorizontal ? 0 : this.viewportSize * position
-				);
-
-				this.position = position;
-				this.forceUpdate();
-			},
-			{
-				easing: smootherStep
-			}
+			position => this.setPosition(position, true),
+			{ easing: smootherStep }
 		);
 	}
 
 	public scrollTo(offset: number, animationOptions?: JSAnimationOptions) {
 		this.animation.start({
 			...animationOptions,
-			valueFrom: this.position,
+			valueFrom: this.presentationPosition,
 			valueTo: offset
 		});
 
@@ -41,11 +30,11 @@ export class ScrollPresentation extends PresentationBase {
 	}
 
 	private readonly onScroll = () => {
-		if (this.animation.isRunning) {
-			return;
+		if (!this.animation.isRunning) {
+			this.setPosition(this.isHorizontal
+				? this.viewport!.scrollLeft
+				: this.viewport!.scrollTop);
 		}
-
-		this.setPosition(this.isHorizontal ? this.viewport!.scrollLeft : this.viewport!.scrollTop);
 	};
 
 	public static readonly defaultProps = PresentationBase.defaultProps;
