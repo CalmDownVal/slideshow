@@ -7,19 +7,19 @@
 	position: sticky;
 }
 
-.slideshow--left-to-right > .slideshow__slide {
+.slideshow--row > .slideshow__slide {
 	left: calc(var(--ss-position) * var(--ss-unit));
 }
 
-.slideshow--right-to-left > .slideshow__slide {
+.slideshow--row-reverse > .slideshow__slide {
 	right: calc(var(--ss-position) * var(--ss-unit));
 }
 
-.slideshow--top-to-bottom > .slideshow__slide {
+.slideshow--column > .slideshow__slide {
 	top: calc(var(--ss-position) * var(--ss-unit));
 }
 
-.slideshow--bottom-to-top > .slideshow__slide {
+.slideshow--column-reverse > .slideshow__slide {
 	bottom: calc(var(--ss-position) * var(--ss-unit));
 }
 

@@ -5,6 +5,7 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .5);
 }
 
 .transitions__header {
@@ -13,16 +14,4 @@
 	top: 5rem;
 	right: 1rem;
 	margin: 0;
-}
-
-.cdv-presentation__viewport--horizontal .transitions {
-	background:
-		linear-gradient(to left, rgba(0, 0, 0, .5) 1px, transparent 0),
-		linear-gradient(to right, rgba(0, 0, 0, .5) 1px, transparent 0);
-}
-
-.cdv-presentation__viewport--vertical .transitions {
-	background:
-		linear-gradient(to top, rgba(0, 0, 0, .5) 1px, transparent 0),
-		linear-gradient(to bottom, rgba(0, 0, 0, .5) 1px, transparent 0);
 }

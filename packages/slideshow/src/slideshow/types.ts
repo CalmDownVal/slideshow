@@ -10,7 +10,7 @@ export interface SlideConfig {
 
 export interface SlideLayout extends Readonly<SlideConfig> {
 	canUnmount: boolean;
-	isVisible: boolean;
+	isInvisible: boolean;
 	position: number;
 }
 

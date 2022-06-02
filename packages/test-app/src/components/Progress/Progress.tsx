@@ -1,4 +1,4 @@
-import { Progression } from '@calmdownval/presentation';
+import { Progression } from '@calmdownval/slideshow';
 import { h } from 'preact';
 
 import './Progress.css';

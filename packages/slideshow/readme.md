@@ -26,44 +26,35 @@ import '@calmdownval/slideshow/style.css';
 
 ## Usage
 
-### Slideshow Component
+### SlideshowProvider Component
 
-To build a slideshow start by picking a suitable slideshow component. Currently
-there are two options:
-
-- `ScrollSlideshow` - for slideshows with visible sliders the user can control
-  themselves
-- `ManualPresentation` - exposes a `position` prop which you can use to control
-  the presentation from code
-
-You can also extend the abstract `PresentationBase` class to implement your own
-logic.
+A slideshow must be wrapped in a `<SlideshowProvider>` component. This component
+manages the state and layout computations of the entire slideshow.
 
 ### Viewport Component
 
-Every presentation needs a viewport. This creates an element that will wrap all
-the slides. It is separated from presentation to allow adding extra components
-outside of the viewport while still being able to consume the navigation
-context.
+Every slideshow also needs a viewport. It manages a basic DOM structure that
+wraps all the slides. It is separated from slideshow provider to allow adding
+custom components outside of the viewport and still being able to consume the
+slideshow context.
 
-For user-controllable presentations make sure to set the viewport's `scrollable`
-prop to explicitly enable scroll bars.
+For user-controllable slideshows make sure to set the viewport's `scrollable`
+prop to enable scroll bars.
 
 ### Slide Components
 
-All that's left is to add a bunch of slides into the viewport. Each slide
-requires a `component` prop to specify the contents of the slide. This component
-will receive a single prop `metadata` which can be used to pass custom data down
-to the content component.
+All that's left is to add some slides into the viewport. Each slide requires a
+`component` prop to specify the contents of the slide. This component will
+receive a single prop `metadata` which can be used to pass custom data down to
+the content component.
 
 By default each slide will be exactly the size of the viewport along the scroll
 axis. To change this you can set the `length` prop to any value greater than
 zero. 1 indicates viewport size, 2 double the size etc.
 
-Slides can dock to the lower edge of the viewport (numerically speaking, i.e.
-top for vertical or left for horizontal presentations). To enable this feature
-set the `dock` property to values greater than zero. When such a slide reaches
-the docking edge the presentation will stop scrolling for the requested length.
+Slides can dock to the edge of the viewport. To enable this feature set the
+`dock` prop to values greater than zero. When such a slide reaches the docking
+edge the slideshow will stop scrolling for the requested length.
 
 ### useProgression hook
 
@@ -82,7 +73,7 @@ the individual phases of a slide. Each value ranges from zero to one
 Example usage:
 
 ```tsx
-import { Progression, useProgression } from '@calmdownval/presentation';
+import { Progression, useProgression } from '@calmdownval/slideshow';
 import { h } from 'preact';
 
 export const MyComponent = () => {
@@ -105,25 +96,25 @@ be used to scroll to a specific slide programmatically.
 
 ## Example
 
-This example shows a super simple presentation
+This example shows a super simple slideshow
 
 ```tsx
-import { ScrollPresentation, Slide, SlideComponentProps, Viewport } from '@calmdownval/presentation';
+import { Slide, SlideComponentProps, SlideshowProvider, Viewport } from '@calmdownval/slideshow';
 import { h } from 'preact';
 
-import '@calmdownval/presentation/style.css';
+import '@calmdownval/slideshow/style.css';
 
 const Content = ({ metadata }: SlideComponentProps<string>) => (
   <h2>{metadata}</h2>
 );
 
 export const App = () => (
-  <ScrollPresentation>
+  <SlideshowProvider>
     <Viewport scrollable>
       <Slide component={Content} metadata='First' />
       <Slide component={Content} metadata='Second' />
       <Slide component={Content} metadata='Third' />
     </Viewport>
-  </ScrollPresentation>
+  </SlideshowProvider>
 );
 ```

@@ -1,20 +1,20 @@
 import { h, RenderableProps } from 'preact';
 
-import { bem, bemUpdate } from '~/utils/style';
+import { bem, cx } from '~/utils/style';
 
 import type { SlideshowProvider } from './SlideshowProvider';
 import { SlideshowResource } from './SlideshowResource';
 import type { ViewportLayout } from './types';
 
 export enum SlideshowDirection {
-	TopToBottom,
-	LeftToRight,
+	Column,
+	Row,
 
 	// currently reverse directions do not support docking
 	// it seems that with justify-content set to flex-end, overflow no longer
 	// works and an additional container is required to allow scrolling
-	BottomToTop,
-	RightToLeft
+	ColumnReverse,
+	RowReverse
 }
 
 export enum SlideshowUnit {
@@ -23,6 +23,7 @@ export enum SlideshowUnit {
 }
 
 export interface ViewportProps {
+	readonly class?: string;
 	readonly direction?: SlideshowDirection;
 	readonly units?: SlideshowUnit;
 	readonly scrollable?: boolean;
@@ -39,8 +40,8 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 	public get isHorizontal() {
 		const { direction } = this.props;
 		return (
-			direction === SlideshowDirection.LeftToRight ||
-			direction === SlideshowDirection.RightToLeft
+			direction === SlideshowDirection.Row ||
+			direction === SlideshowDirection.RowReverse
 		);
 	}
 
@@ -68,20 +69,24 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 	}
 
 	public render({
+		class: customClass,
 		children,
-		direction = SlideshowDirection.TopToBottom,
+		direction = SlideshowDirection.Column,
 		scrollable
 	}: RenderableProps<ViewportProps>) {
 		return (
 			<div
 				ref={this.onWrapperRef}
-				class={bem('slideshow', {
-					'scrollable': scrollable,
-					'top-to-bottom': direction === SlideshowDirection.TopToBottom,
-					'left-to-right': direction === SlideshowDirection.LeftToRight,
-					'bottom-to-top': direction === SlideshowDirection.BottomToTop,
-					'right-to-left': direction === SlideshowDirection.RightToLeft
-				})}
+				class={cx(
+					bem('slideshow', {
+						'scrollable': scrollable,
+						'column': direction === SlideshowDirection.Column,
+						'column-reverse': direction === SlideshowDirection.ColumnReverse,
+						'row': direction === SlideshowDirection.Row,
+						'row-reverse': direction === SlideshowDirection.RowReverse
+					}),
+					customClass
+				)}
 			>
 				<div class='slideshow__expander' />
 				{children}
@@ -107,13 +112,11 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 				break;
 		}
 
-		this.wrapper.style.setProperty('--ss-expand-start', '' + layout.expandStart);
-		this.wrapper.style.setProperty('--ss-expand-end', '' + layout.expandEnd);
-		this.wrapper.style.setProperty('--ss-unit', unit);
-
-		bemUpdate(this.wrapper.classList, 'slideshow', {
-			docked: layout.isDocked
-		});
+		const { classList, style } = this.wrapper;
+		style.setProperty('--ss-expand-start', '' + layout.expandStart);
+		style.setProperty('--ss-expand-end', '' + layout.expandEnd);
+		style.setProperty('--ss-unit', unit);
+		classList.toggle('slideshow--docked', layout.isDocked);
 	}
 
 	protected onUpdateSlideshow(context: SlideshowProvider | null, props: ViewportProps) {

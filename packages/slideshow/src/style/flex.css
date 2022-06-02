@@ -9,22 +9,22 @@
 	justify-content: flex-start;
 }
 
-.slideshow--left-to-right {
+.slideshow--row {
 	flex-direction: row;
 	/* justify-content: flex-start; */
 }
 
-.slideshow--right-to-left {
+.slideshow--row-reverse {
 	flex-direction: row-reverse;
 	/* justify-content: flex-end; */
 }
 
-.slideshow--top-to-bottom {
+.slideshow--column {
 	flex-direction: column;
 	/* justify-content: flex-start; */
 }
 
-.slideshow--bottom-to-top {
+.slideshow--column-reverse {
 	flex-direction: column-reverse;
 	/* justify-content: flex-end; */
 }

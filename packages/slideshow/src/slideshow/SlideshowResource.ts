@@ -1,14 +1,12 @@
 import { Component } from 'preact';
 
-import { apply } from '~/utils/props';
-
 import { SlideshowContext, SlideshowProvider } from './SlideshowProvider';
 import type { LayoutComponent } from './types';
 
 export abstract class SlideshowResource<TLayout, TProps = {}, TState = {}> extends Component<TProps, TState> implements LayoutComponent<TLayout> {
 	declare public context: SlideshowProvider | null;
 
-	private layout?: TLayout;
+	protected layout: TLayout | null = null;
 
 	public componentDidMount() {
 		this.updateSlideshow();
@@ -28,9 +26,22 @@ export abstract class SlideshowResource<TLayout, TProps = {}, TState = {}> exten
 	}
 
 	public updateLayout(layout: Readonly<TLayout>) {
-		if (!this.layout || apply(this.layout, layout)) {
-			this.onUpdateLayout(this.layout ??= layout);
+		if (this.layout) {
+			let hasChanged = false;
+			for (const key in layout) {
+				if (layout[key] !== this.layout[key]) {
+					hasChanged = true;
+					break;
+				}
+			}
+
+			if (!hasChanged) {
+				return;
+			}
 		}
+
+		this.layout = layout;
+		this.onUpdateLayout(layout);
 	}
 
 	public updateSlideshow(

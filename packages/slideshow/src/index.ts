@@ -4,7 +4,6 @@ export * from './slideshow/Viewport';
 
 export * from './utils/JSAnimation';
 export * from './utils/mergeSort';
-export * from './utils/props';
 export * from './utils/style';
 
 // style

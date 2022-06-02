@@ -1,4 +1,4 @@
-import { useProgression } from '@calmdownval/presentation';
+import { useProgression } from '@calmdownval/slideshow';
 import { h } from 'preact';
 
 import { Progress } from '~/components/Progress/Progress';

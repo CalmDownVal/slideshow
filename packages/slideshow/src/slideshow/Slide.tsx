@@ -1,6 +1,6 @@
 import { createContext, ComponentType, h } from 'preact';
 
-import { bemUpdate } from '~/utils/style';
+import { bem, cx } from '~/utils/style';
 
 import type { SlideshowProvider } from './SlideshowProvider';
 import { SlideshowResource } from './SlideshowResource';
@@ -11,6 +11,7 @@ export interface SlideComponentProps<TMeta = any> {
 }
 
 export interface SlideProps<TMeta = any> {
+	readonly class?: string;
 	readonly component: ComponentType<SlideComponentProps<TMeta>>;
 	readonly dock?: number;
 	readonly length?: number;
@@ -51,9 +52,17 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 		);
 	}
 
-	public render({ component, metadata, persist }: SlideProps, { canUnmount }: SlideState) {
+	public render({ class: customClass, component, metadata, persist }: SlideProps, { canUnmount }: SlideState) {
 		return (
-			<div class='slideshow__slide' ref={this.onWrapperRef}>
+			<div
+				ref={this.onWrapperRef}
+				class={cx(
+					bem('slideshow__slide', {
+						invisible: this.layout?.isInvisible
+					}),
+					customClass
+				)}
+			>
 				{canUnmount && !persist
 					? null
 					: (
@@ -71,13 +80,11 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 			return;
 		}
 
-		bemUpdate(this.wrapper.classList, 'slideshow__slide', {
-			visible: layout.isVisible
-		});
-
-		this.wrapper.style.order = '' + layout.order;
-		this.wrapper.style.setProperty('--ss-position', '' + layout.position);
-		this.wrapper.style.setProperty('--ss-length', '' + layout.length);
+		const { classList, style } = this.wrapper;
+		style.order = '' + layout.order;
+		style.setProperty('--ss-position', '' + layout.position);
+		style.setProperty('--ss-length', '' + layout.length);
+		classList.toggle('slideshow__slide--invisible', layout.isInvisible);
 	}
 
 	protected onUpdateSlideshow(context: SlideshowProvider | null, props: SlideProps) {

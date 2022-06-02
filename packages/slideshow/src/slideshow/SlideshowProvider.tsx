@@ -1,7 +1,6 @@
 import { Component, createContext, h, RenderableProps } from 'preact';
 
 import { mergeSort } from '~/utils/mergeSort';
-import { apply } from '~/utils/props';
 
 import type { LayoutComponent, SlideConfig, SlideLayout, ViewportConfig, ViewportLayout } from './types';
 
@@ -167,7 +166,7 @@ export class SlideshowProvider extends Component {
 			slide.component.updateLayout({
 				...slide,
 				canUnmount: false, // TODO: clipping
-				isVisible: true, // TODO: score > 0,
+				isInvisible: false, // TODO: score <= 0,
 				position
 			});
 
@@ -193,4 +192,16 @@ interface ViewportInfo extends Readonly<ViewportConfig> {
 
 function byOrderAsc(a: SlideInfo, b: SlideInfo) {
 	return a.order - b.order;
+}
+
+function apply<T extends Record<string, any>>(current: T, incoming: T) {
+	let didChange = false;
+	for (const key in incoming) {
+		if (current[key] !== incoming[key]) {
+			current[key] = incoming[key];
+			didChange = true;
+		}
+	}
+
+	return didChange;
 }

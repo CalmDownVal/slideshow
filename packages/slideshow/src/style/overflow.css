@@ -1,19 +1,19 @@
-.slideshow--left-to-right,
-.slideshow--right-to-left {
+.slideshow--row,
+.slideshow--row-reverse {
 	overflow: hidden clip;
 }
 
-.slideshow--top-to-bottom,
-.slideshow--bottom-to-top {
+.slideshow--column,
+.slideshow--column-reverse {
 	overflow: clip hidden;
 }
 
-.slideshow--left-to-right.slideshow--scrollable,
-.slideshow--right-to-left.slideshow--scrollable {
+.slideshow--row.slideshow--scrollable,
+.slideshow--row-reverse.slideshow--scrollable {
 	overflow: scroll clip;
 }
 
-.slideshow--top-to-bottom.slideshow--scrollable,
-.slideshow--bottom-to-top.slideshow--scrollable {
+.slideshow--column.slideshow--scrollable,
+.slideshow--column-reverse.slideshow--scrollable {
 	overflow: clip scroll;
 }
