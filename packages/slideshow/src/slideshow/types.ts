@@ -6,6 +6,7 @@ export interface SlideConfig {
 	dock: number;
 	length: number;
 	order: number;
+	isMounted: boolean;
 }
 
 export interface SlideLayout extends Readonly<SlideConfig> {

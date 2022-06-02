@@ -95,7 +95,8 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 		context?.setSlide(this, {
 			dock: props.dock ?? 0,
 			length: props.length ?? 1,
-			order: props.order ?? this.fallbackOrder
+			order: props.order ?? this.fallbackOrder,
+			isMounted: !this.state.canUnmount
 		});
 	}
 

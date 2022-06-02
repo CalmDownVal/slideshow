@@ -4,9 +4,14 @@ import { mergeSort } from '~/utils/mergeSort';
 
 import type { LayoutComponent, SlideConfig, SlideLayout, ViewportConfig, ViewportLayout } from './types';
 
+export interface SlideshowProviderProps {
+	readonly unmountThreshold?: number;
+	readonly remountThreshold?: number;
+}
+
 export const SlideshowContext = createContext<SlideshowProvider | null>(null);
 
-export class SlideshowProvider extends Component {
+export class SlideshowProvider extends Component<SlideshowProviderProps> {
 	public slides: SlideInfo[] = [];
 
 	private readonly slideMap = new Map<LayoutComponent<SlideLayout>, SlideInfo>();
@@ -15,7 +20,7 @@ export class SlideshowProvider extends Component {
 	private viewport: ViewportInfo | null = null;
 	private frame?: number;
 
-	public shouldComponentUpdate(nextProps: RenderableProps<{}>) {
+	public shouldComponentUpdate(nextProps: RenderableProps<SlideshowProviderProps>) {
 		return this.props.children !== nextProps.children;
 	}
 
@@ -34,7 +39,8 @@ export class SlideshowProvider extends Component {
 				component: slide,
 				dock: 0,
 				length: 1,
-				order: 0
+				order: 0,
+				isMounted: true
 			};
 
 			this.slideMap.set(slide, info);
@@ -147,27 +153,35 @@ export class SlideshowProvider extends Component {
 		// Pass 3: dispatch layout calls
 		// ---
 
-		let position = viewport.paddingStart - lengthStart;
-		// let bestScore = 0;
-		// let bestSlide = null;
+		const positionOffset = viewport.paddingStart - lengthStart;
+		const visibilityOffset = viewport.paddingStart - (isDocked ? lengthStart : offset - dockStart);
+		const {
+			unmountThreshold = 1.5,
+			remountThreshold = 0.5
+		} = this.props;
+
+		let position = 0;
+		let bestScore = 0;
+		let bestSlide = null;
 
 		for (let i = 0; i < count; ++i) {
 			const slide = slides[i];
-			// const score = (
-			// 	Math.min(viewport.size, position + slide.length) -
-			// 	Math.max(0, position)
-			// ) / slide.length;
+			const visibleLength =
+				Math.min(viewport.size, visibilityOffset + position + slide.length) -
+				Math.max(0, visibilityOffset + position);
 
-			// if (score > bestScore) {
-			// 	bestScore = score;
-			// 	bestSlide = slide;
-			// }
+			// clamping to ≤1 avoids float rounding errors
+			const score = Math.min(visibleLength / slide.length, 1);
+			if (score > bestScore) {
+				bestScore = score;
+				bestSlide = slide;
+			}
 
 			slide.component.updateLayout({
 				...slide,
-				canUnmount: false, // TODO: clipping
-				isInvisible: false, // TODO: score <= 0,
-				position
+				position: positionOffset + position,
+				isInvisible: visibleLength <= 0,
+				canUnmount: -visibleLength / viewport.size >= (slide.isMounted ? unmountThreshold : remountThreshold)
 			});
 
 			position += slide.length;
