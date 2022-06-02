@@ -2,6 +2,7 @@ import typescript from '@rollup/plugin-typescript';
 import deleteBeforeBuild from 'rollup-plugin-delete';
 import definitions from 'rollup-plugin-dts';
 import externals from 'rollup-plugin-node-externals';
+import postcss from 'rollup-plugin-postcss';
 import { terser } from 'rollup-plugin-terser';
 
 const codeOutputOpts = {
@@ -37,6 +38,9 @@ export default [
 				targets: './build/*',
 				runOnce: true
 			}),
+			postcss({
+				extract: 'style.css'
+			}),
 			typescript(),
 			externals({
 				peerDeps: true
@@ -50,6 +54,9 @@ export default [
 			format: 'es'
 		},
 		plugins: [
+			postcss({
+				extract: false
+			}),
 			typescript(),
 			definitions()
 		]

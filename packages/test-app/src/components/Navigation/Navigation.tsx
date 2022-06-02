@@ -1,4 +1,4 @@
-import { bem, useNavigation } from '@calmdownval/presentation';
+import { bem, useNavigation } from '@calmdownval/slideshow';
 import { h } from 'preact';
 
 import './Navigation.css';

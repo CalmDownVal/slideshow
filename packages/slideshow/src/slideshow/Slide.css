@@ -1,0 +1,38 @@
+.slideshow__slide {
+	position: absolute;
+	display: inline-block;
+}
+
+.slideshow--docked > .slideshow__slide {
+	position: sticky;
+}
+
+.slideshow--left-to-right > .slideshow__slide,
+.slideshow--right-to-left > .slideshow__slide {
+	top: 0;
+	bottom: 0;
+	height: 100%;
+}
+
+.slideshow--left-to-right > .slideshow__slide {
+	left: calc(var(--slide-position) * var(--slideshow-unit));
+}
+
+.slideshow--right-to-left > .slideshow__slide {
+	right: calc(var(--slide-position) * var(--slideshow-unit));
+}
+
+.slideshow--top-to-bottom > .slideshow__slide,
+.slideshow--bottom-to-top > .slideshow__slide {
+	left: 0;
+	right: 0;
+	width: 100%;
+}
+
+.slideshow--top-to-bottom > .slideshow__slide {
+	top: calc(var(--slide-position) * var(--slideshow-unit));
+}
+
+.slideshow--bottom-to-top > .slideshow__slide {
+	bottom: calc(var(--slide-position) * var(--slideshow-unit));
+}

@@ -17,12 +17,13 @@ export type JSAnimationOptions = Partial<JSAnimationProps>;
 
 export class JSAnimation implements JSAnimationProps {
 	public duration = 500;
-	public easing: EasingFunction = linear;
+	public easing: EasingFunction = smoothStep;
 	public valueFrom = 0.0;
 	public valueTo = 1.0;
 
-	private handle?: number;
+	private frame?: number;
 	private startTime?: number;
+	private lastValue = 0.0;
 
 	public constructor(
 		private readonly callback: JSAnimationCallback,
@@ -32,31 +33,32 @@ export class JSAnimation implements JSAnimationProps {
 	}
 
 	public get isRunning() {
-		return this.handle !== undefined;
+		return this.frame !== undefined;
 	}
 
 	public start(options?: JSAnimationOptions) {
 		this.stop();
-		Object.assign(this, options);
+		this.valueFrom = this.lastValue;
 		this.startTime = undefined;
-		this.handle = requestAnimationFrame(this.onTick);
+		Object.assign(this, options);
+		this.frame = requestAnimationFrame(this.onTick);
 	}
 
 	public stop() {
-		if (this.handle !== undefined) {
-			cancelAnimationFrame(this.handle);
-			this.handle = undefined;
+		if (this.frame !== undefined) {
+			cancelAnimationFrame(this.frame);
+			this.frame = undefined;
 		}
 	}
 
 	private readonly onTick = (time: number) => {
 		this.startTime ??= time;
-
 		const progress = this.duration <= 0 ? 1 : Math.min((time - this.startTime) / this.duration, 1);
-		const value = this.valueFrom + this.easing(progress) * (this.valueTo - this.valueFrom);
 
-		this.callback(value);
-		this.handle = progress < 1
+		this.lastValue = this.valueFrom + this.easing(progress) * (this.valueTo - this.valueFrom);
+		this.callback(this.lastValue);
+
+		this.frame = progress < 1
 			? requestAnimationFrame(this.onTick)
 			: undefined;
 	};
@@ -68,15 +70,7 @@ export class JSAnimation implements JSAnimationProps {
 	}
 }
 
-// basic easing functions
-export function linear(x: number) {
-	return x;
-}
-
+// default easing function
 export function smoothStep(x: number) {
 	return x * x * (3.0 - 2.0 * x);
-}
-
-export function smootherStep(x: number) {
-	return x * x * x * (x * (x * 6.0 - 15.0) + 10.0);
 }

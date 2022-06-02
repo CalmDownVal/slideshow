@@ -1,6 +1,6 @@
-# Preact Presentations
+# Preact Slideshows
 
-A small (~ 10kB) library for scroll presentations with Preact.
+A small (~ 10kB) library for scroll slideshows with Preact.
 
 ## Installation
 
@@ -11,28 +11,28 @@ typings and needs no additional dependencies to use with TypeScript.
 
 ```sh
 # using NPM
-npm install @calmdownval/presentation
+npm install @calmdownval/slideshow
 
 # using Yarn
-yarn add @calmdownval/presentation
+yarn add @calmdownval/slideshow
 ```
 
 The package also contains a CSS stylesheet which should be imported into your
 application. The easiest way is to add the following import to your index file:
 
 ```ts
-import '@calmdownval/presentation/style.css';
+import '@calmdownval/slideshow/style.css';
 ```
 
 ## Usage
 
-### Presentation Component
+### Slideshow Component
 
-To build a presentation start by picking a suitable presentation component.
-Currently there are two options:
+To build a slideshow start by picking a suitable slideshow component. Currently
+there are two options:
 
-- `ScrollPresentation` - for presentations with visible sliders the user can
-  control themselves
+- `ScrollSlideshow` - for slideshows with visible sliders the user can control
+  themselves
 - `ManualPresentation` - exposes a `position` prop which you can use to control
   the presentation from code
 

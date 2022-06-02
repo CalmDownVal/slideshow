@@ -1,20 +1,24 @@
-import { Direction, ScrollPresentation, Slide, Viewport } from '@calmdownval/presentation';
+import { Slide, SlideshowDirection, SlideshowProvider, Viewport } from '@calmdownval/slideshow';
 import { h } from 'preact';
 
-import { Navigation } from '~/components/Navigation/Navigation';
-import { Transitions } from '~/components/Transitions/Transitions';
+// import { Navigation } from '~/components/Navigation/Navigation';
+// import { Transitions } from '~/components/Transitions/Transitions';
+
+const Content = ({ metadata }: { metadata?: string }) => (
+	<p>{metadata}</p>
+);
 
 export function App() {
 	return (
-		<ScrollPresentation direction={Direction.TopToBottom}>
-			<Viewport scrollable>
-				<Navigation />
-				<Slide component={Transitions} metadata='1' />
-				<Slide component={Transitions} metadata='2' length={0.3} dock={0.5} />
-				<Slide component={Transitions} metadata='3' length={0.3} dock={0.5} />
-				<Slide component={Transitions} metadata='4' length={0.3} dock={0.5} />
-				<Slide component={Transitions} metadata='5' />
+		<SlideshowProvider>
+			<Viewport direction={SlideshowDirection.TopToBottom} scrollable>
+				{/* <Navigation /> */}
+				<Slide component={Content} metadata='1' />
+				<Slide component={Content} metadata='2' length={0.3} dock={0.5} />
+				<Slide component={Content} metadata='3' length={0.3} dock={0.5} />
+				<Slide component={Content} metadata='4' length={0.3} dock={0.5} />
+				<Slide component={Content} metadata='5' />
 			</Viewport>
-		</ScrollPresentation>
+		</SlideshowProvider>
 	);
 }

@@ -1,4 +1,16 @@
-export function bem(componentName: string, modifiers: Record<string, boolean | null | undefined>) {
+export interface BemModifiers {
+	[name: string]: boolean | null | undefined;
+}
+
+export function bemUpdate(classList: DOMTokenList, componentName: string, modifiers: BemModifiers) {
+	classList.add(componentName);
+	for (const modifier in modifiers) {
+		classList.toggle(`${componentName}--${modifier}`, Boolean(modifiers[modifier]));
+	}
+}
+
+/*
+export function bem(componentName: string, modifiers: BemModifiers) {
 	let classNames = componentName;
 	for (const modifier in modifiers) {
 		if (modifiers[modifier]) {
@@ -22,11 +34,4 @@ export function cx() {
 
 	return classNames;
 }
-
-export function px(length: number) {
-	return Math.round(length) + 'px';
-}
-
-export function percent(length: number) {
-	return Math.round(100.0 * length) + '%';
-}
+*/

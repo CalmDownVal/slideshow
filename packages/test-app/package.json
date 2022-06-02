@@ -1,9 +1,9 @@
 {
-	"name": "@calmdownval/presentation-test-app",
+	"name": "@calmdownval/slideshow-test-app",
 	"version": "0.0.0",
 	"private": true,
 	"dependencies": {
-		"@calmdownval/presentation": "*",
+		"@calmdownval/slideshow": "*",
 		"preact": "10.7.2"
 	},
 	"devDependencies": {

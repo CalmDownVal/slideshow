@@ -1,6 +1,9 @@
 {
 	"compilerOptions": {
 		"baseUrl": "./src",
+		"jsx": "react",
+		"jsxFactory": "h",
+		"jsxFragmentFactory": "Fragment",
 		"lib": [
 			"DOM",
 			"ESNext"
