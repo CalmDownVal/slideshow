@@ -15,3 +15,24 @@ body {
 	position: fixed;
 	inset: 0;
 }
+
+.slideshow__slide:nth-child(2) {
+	background: hsla(0, 100%, 50%, 0.2);
+}
+
+.slideshow__slide:nth-child(3) {
+	background: hsla(60, 100%, 50%, 0.2);
+}
+
+.slideshow__slide:nth-child(4) {
+	background: hsla(120, 100%, 50%, 0.2);
+}
+
+.slideshow__slide:nth-child(5) {
+	background: hsla(180, 100%, 50%, 0.2);
+}
+
+.slideshow__slide:nth-child(6) {
+	background: hsla(240, 100%, 50%, 0.2);
+}
+

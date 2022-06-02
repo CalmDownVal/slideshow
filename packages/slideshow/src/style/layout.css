@@ -1,0 +1,34 @@
+.slideshow__slide {
+	box-sizing: border-box;
+	flex-basis: calc(var(--ss-length) * var(--ss-unit));
+}
+
+.slideshow--docked > .slideshow__slide {
+	position: sticky;
+}
+
+.slideshow--left-to-right > .slideshow__slide {
+	left: calc(var(--ss-position) * var(--ss-unit));
+}
+
+.slideshow--right-to-left > .slideshow__slide {
+	right: calc(var(--ss-position) * var(--ss-unit));
+}
+
+.slideshow--top-to-bottom > .slideshow__slide {
+	top: calc(var(--ss-position) * var(--ss-unit));
+}
+
+.slideshow--bottom-to-top > .slideshow__slide {
+	bottom: calc(var(--ss-position) * var(--ss-unit));
+}
+
+.slideshow__expander:first-of-type {
+	flex-basis: calc(var(--ss-expand-start) * var(--ss-unit));
+	order: -999999;
+}
+
+.slideshow__expander:last-of-type {
+	flex-basis: calc(var(--ss-expand-end) * var(--ss-unit));
+	order: 999999;
+}

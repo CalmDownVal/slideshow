@@ -1,16 +1,18 @@
 import { h, RenderableProps } from 'preact';
 
-import { bemUpdate } from '~/utils/style';
+import { bem, bemUpdate } from '~/utils/style';
 
 import type { SlideshowProvider } from './SlideshowProvider';
 import { SlideshowResource } from './SlideshowResource';
 import type { ViewportLayout } from './types';
 
-import './Viewport.css';
-
 export enum SlideshowDirection {
 	TopToBottom,
 	LeftToRight,
+
+	// currently reverse directions do not support docking
+	// it seems that with justify-content set to flex-end, overflow no longer
+	// works and an additional container is required to allow scrolling
 	BottomToTop,
 	RightToLeft
 }
@@ -59,37 +61,39 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 
 		const prevProps = this.props;
 		return (
-			prevProps.children !== nextProps.children
+			prevProps.children !== nextProps.children ||
+			prevProps.scrollable !== nextProps.scrollable ||
+			prevProps.direction !== nextProps.direction
 		);
 	}
 
-	public render() {
+	public render({
+		children,
+		direction = SlideshowDirection.TopToBottom,
+		scrollable
+	}: RenderableProps<ViewportProps>) {
 		return (
-			<div class='slideshow' ref={this.onWrapperRef}>
-				{this.props.children}
+			<div
+				ref={this.onWrapperRef}
+				class={bem('slideshow', {
+					'scrollable': scrollable,
+					'top-to-bottom': direction === SlideshowDirection.TopToBottom,
+					'left-to-right': direction === SlideshowDirection.LeftToRight,
+					'bottom-to-top': direction === SlideshowDirection.BottomToTop,
+					'right-to-left': direction === SlideshowDirection.RightToLeft
+				})}
+			>
+				<div class='slideshow__expander' />
+				{children}
 				<div class='slideshow__expander' />
 			</div>
 		);
 	}
 
-	public updateLayout(layout: Readonly<ViewportLayout>) {
+	protected onUpdateLayout(layout: Readonly<ViewportLayout>) {
 		if (!this.wrapper) {
 			return;
 		}
-
-		const {
-			direction = SlideshowDirection.TopToBottom,
-			scrollable
-		} = this.props;
-
-		bemUpdate(this.wrapper.classList, 'slideshow', {
-			'docked': layout.isDocked,
-			'scrollable': scrollable,
-			'top-to-bottom': direction === SlideshowDirection.TopToBottom,
-			'left-to-right': direction === SlideshowDirection.LeftToRight,
-			'bottom-to-top': direction === SlideshowDirection.BottomToTop,
-			'right-to-left': direction === SlideshowDirection.RightToLeft
-		});
 
 		let unit;
 		switch (this.props.units) {
@@ -103,14 +107,16 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 				break;
 		}
 
-		this.wrapper.style.setProperty('--slideshow-length', '' + layout.totalLength);
-		this.wrapper.style.setProperty('--slideshow-unit', unit);
+		this.wrapper.style.setProperty('--ss-expand-start', '' + layout.expandStart);
+		this.wrapper.style.setProperty('--ss-expand-end', '' + layout.expandEnd);
+		this.wrapper.style.setProperty('--ss-unit', unit);
+
+		bemUpdate(this.wrapper.classList, 'slideshow', {
+			docked: layout.isDocked
+		});
 	}
 
-	protected updateSlideshow(
-		context: SlideshowProvider | null = this.context,
-		props: ViewportProps = this.props
-	) {
+	protected onUpdateSlideshow(context: SlideshowProvider | null, props: ViewportProps) {
 		if (context !== this.context) {
 			this.context?.unsetViewport(this);
 		}
@@ -169,8 +175,7 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 	private readonly onResizeObserved = (entries: readonly ResizeObserverEntry[]) => {
 		const entry = entries[0].contentRect;
 		this.size = this.isHorizontal ? entry.width : entry.height;
-
-		if (this.props.units !== SlideshowUnit.Pixels) {
+		if (this.props.units === SlideshowUnit.Pixels) {
 			this.updateSlideshow();
 		}
 	};

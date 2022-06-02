@@ -1,0 +1,19 @@
+.slideshow--left-to-right,
+.slideshow--right-to-left {
+	overflow: hidden clip;
+}
+
+.slideshow--top-to-bottom,
+.slideshow--bottom-to-top {
+	overflow: clip hidden;
+}
+
+.slideshow--left-to-right.slideshow--scrollable,
+.slideshow--right-to-left.slideshow--scrollable {
+	overflow: scroll clip;
+}
+
+.slideshow--top-to-bottom.slideshow--scrollable,
+.slideshow--bottom-to-top.slideshow--scrollable {
+	overflow: clip scroll;
+}

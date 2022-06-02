@@ -2,14 +2,6 @@ export interface BemModifiers {
 	[name: string]: boolean | null | undefined;
 }
 
-export function bemUpdate(classList: DOMTokenList, componentName: string, modifiers: BemModifiers) {
-	classList.add(componentName);
-	for (const modifier in modifiers) {
-		classList.toggle(`${componentName}--${modifier}`, Boolean(modifiers[modifier]));
-	}
-}
-
-/*
 export function bem(componentName: string, modifiers: BemModifiers) {
 	let classNames = componentName;
 	for (const modifier in modifiers) {
@@ -19,6 +11,13 @@ export function bem(componentName: string, modifiers: BemModifiers) {
 	}
 
 	return classNames;
+}
+
+export function bemUpdate(classList: DOMTokenList, componentName: string, modifiers: BemModifiers) {
+	classList.add(componentName);
+	for (const modifier in modifiers) {
+		classList.toggle(`${componentName}--${modifier}`, Boolean(modifiers[modifier]));
+	}
 }
 
 export function cx(...classNames: (string | null | undefined)[]): string;
@@ -34,4 +33,3 @@ export function cx() {
 
 	return classNames;
 }
-*/

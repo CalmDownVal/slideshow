@@ -5,7 +5,6 @@ export interface LayoutComponent<T> {
 export interface SlideConfig {
 	dock: number;
 	length: number;
-	metadata: any;
 	order: number;
 }
 
@@ -24,5 +23,6 @@ export interface ViewportConfig {
 
 export interface ViewportLayout extends Readonly<ViewportConfig> {
 	isDocked: boolean;
-	totalLength: number;
+	expandStart: number;
+	expandEnd: number;
 }

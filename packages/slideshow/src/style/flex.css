@@ -1,0 +1,34 @@
+.slideshow {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	contain: strict;
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: stretch;
+	justify-content: flex-start;
+}
+
+.slideshow--left-to-right {
+	flex-direction: row;
+	/* justify-content: flex-start; */
+}
+
+.slideshow--right-to-left {
+	flex-direction: row-reverse;
+	/* justify-content: flex-end; */
+}
+
+.slideshow--top-to-bottom {
+	flex-direction: column;
+	/* justify-content: flex-start; */
+}
+
+.slideshow--bottom-to-top {
+	flex-direction: column-reverse;
+	/* justify-content: flex-end; */
+}
+
+.slideshow > * {
+	flex-shrink: 0;
+}

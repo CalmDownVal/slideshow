@@ -11,7 +11,12 @@ const Content = ({ metadata }: { metadata?: string }) => (
 export function App() {
 	return (
 		<SlideshowProvider>
-			<Viewport direction={SlideshowDirection.TopToBottom} scrollable>
+			<Viewport
+				direction={SlideshowDirection.LeftToRight}
+				paddingStart={0.5}
+				paddingEnd={0.5}
+				scrollable
+			>
 				{/* <Navigation /> */}
 				<Slide component={Content} metadata='1' />
 				<Slide component={Content} metadata='2' length={0.3} dock={0.5} />

@@ -1,6 +1,7 @@
 import { Component, createContext, h, RenderableProps } from 'preact';
 
 import { mergeSort } from '~/utils/mergeSort';
+import { apply } from '~/utils/props';
 
 import type { LayoutComponent, SlideConfig, SlideLayout, ViewportConfig, ViewportLayout } from './types';
 
@@ -34,7 +35,6 @@ export class SlideshowProvider extends Component {
 				component: slide,
 				dock: 0,
 				length: 1,
-				metadata: null,
 				order: 0
 			};
 
@@ -106,56 +106,69 @@ export class SlideshowProvider extends Component {
 		const { slides, viewport } = this;
 		const count = slides.length;
 
-		// Pass 1: find the top slide and slide measurements
+		// Pass 1: get the total slide dock and length sum
 		// ---
 
 		let totalDockAndLength = 0;
-		let topLength = 0;
-		let i = 0;
-
-		do {
+		for (let i = 0; i < count; ++i) {
 			totalDockAndLength += slides[i].dock + slides[i].length;
-			if (totalDockAndLength >= viewport.offset) {
+		}
+
+		// Pass 2: find the top slide
+		// ---
+
+		const totalPadding = viewport.paddingStart + viewport.paddingEnd;
+		const offset = Math.min(totalDockAndLength + totalPadding, Math.abs(viewport.offset));
+
+		let lengthStart = 0;
+		let dockStart = 0;
+		let dockEnd = 0;
+		let isDocked = false;
+
+		for (let i = 0; i < count; ++i) {
+			const { dock, length } = slides[i];
+			if (dockStart + lengthStart + dock + length >= offset) {
+				isDocked = dockStart + lengthStart + dock >= offset;
+				if (!isDocked) {
+					dockStart += dock;
+					++i;
+				}
+
+				while (i < count) {
+					dockEnd += slides[i++].dock;
+				}
+
 				break;
 			}
 
-			topLength += slides[i].length;
-		}
-		while (++i < count);
-
-		const topSlideOffset = totalDockAndLength - slides[i].length - viewport.offset;
-		const isDocked = topSlideOffset > 0;
-
-		while (++i < count) {
-			totalDockAndLength += slides[i].dock + slides[i].length;
+			dockStart += dock;
+			lengthStart += length;
 		}
 
-		// Pass 2: dispatch layout calls
+		// Pass 3: dispatch layout calls
 		// ---
 
-		const offset = viewport.paddingStart + (isDocked ? 0 : viewport.offset + topSlideOffset) - topLength;
+		let position = viewport.paddingStart - lengthStart;
+		// let bestScore = 0;
+		// let bestSlide = null;
 
-		let position = 0;
-		let bestScore = 0;
-		let bestSlide = null;
-
-		for (i = 0; i < count; ++i) {
+		for (let i = 0; i < count; ++i) {
 			const slide = slides[i];
-			const score = (
-				Math.min(viewport.size, position + slide.length) -
-				Math.max(0, position)
-			) / slide.length;
+			// const score = (
+			// 	Math.min(viewport.size, position + slide.length) -
+			// 	Math.max(0, position)
+			// ) / slide.length;
 
-			if (score > bestScore) {
-				bestScore = score;
-				bestSlide = slide;
-			}
+			// if (score > bestScore) {
+			// 	bestScore = score;
+			// 	bestSlide = slide;
+			// }
 
 			slide.component.updateLayout({
 				...slide,
-				canUnmount: false, // TODO
-				isVisible: score > 0,
-				position: offset + position
+				canUnmount: false, // TODO: clipping
+				isVisible: true, // TODO: score > 0,
+				position
 			});
 
 			position += slide.length;
@@ -164,7 +177,8 @@ export class SlideshowProvider extends Component {
 		viewport.component.updateLayout({
 			...viewport,
 			isDocked,
-			totalLength: viewport.paddingStart + totalDockAndLength + viewport.paddingEnd
+			expandStart: dockStart + viewport.paddingStart,
+			expandEnd: dockEnd + viewport.paddingEnd
 		});
 	};
 }
@@ -179,16 +193,4 @@ interface ViewportInfo extends Readonly<ViewportConfig> {
 
 function byOrderAsc(a: SlideInfo, b: SlideInfo) {
 	return a.order - b.order;
-}
-
-function apply<T>(current: T, incoming: T) {
-	let didChange = false;
-	for (const key in incoming) {
-		if (current[key] !== incoming[key]) {
-			current[key] = incoming[key];
-			didChange = true;
-		}
-	}
-
-	return didChange;
 }

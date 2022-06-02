@@ -6,8 +6,6 @@ import type { SlideshowProvider } from './SlideshowProvider';
 import { SlideshowResource } from './SlideshowResource';
 import type { SlideLayout } from './types';
 
-import './Slide.css';
-
 export interface SlideComponentProps<TMeta = any> {
 	readonly metadata?: TMeta;
 }
@@ -53,19 +51,21 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 		);
 	}
 
-	public render() {
-		return this.state.canUnmount
-			? null
-			: (
-				<div class='slideshow__slide' ref={this.onWrapperRef}>
-					<SlideContext.Provider value={this}>
-						{h(this.props.component, { metadata: this.props.metadata })}
-					</SlideContext.Provider>
-				</div>
-			);
+	public render({ component, metadata, persist }: SlideProps, { canUnmount }: SlideState) {
+		return (
+			<div class='slideshow__slide' ref={this.onWrapperRef}>
+				{canUnmount && !persist
+					? null
+					: (
+						<SlideContext.Provider value={this}>
+							{h(component, { metadata })}
+						</SlideContext.Provider>
+					)}
+			</div>
+		);
 	}
 
-	public updateLayout(layout: Readonly<SlideLayout>) {
+	protected onUpdateLayout(layout: Readonly<SlideLayout>) {
 		this.setState({ canUnmount: layout.canUnmount });
 		if (!this.wrapper) {
 			return;
@@ -75,11 +75,12 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 			visible: layout.isVisible
 		});
 
-		this.wrapper.style.setProperty('--slide-position', '' + layout.position);
-		this.wrapper.style.setProperty('--slide-length', '' + layout.length);
+		this.wrapper.style.order = '' + layout.order;
+		this.wrapper.style.setProperty('--ss-position', '' + layout.position);
+		this.wrapper.style.setProperty('--ss-length', '' + layout.length);
 	}
 
-	protected updateSlideshow(context: SlideshowProvider | null, props: SlideProps) {
+	protected onUpdateSlideshow(context: SlideshowProvider | null, props: SlideProps) {
 		if (context !== this.context) {
 			this.context?.unsetSlide(this);
 		}
@@ -87,34 +88,38 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 		context?.setSlide(this, {
 			dock: props.dock ?? 0,
 			length: props.length ?? 1,
-			metadata: props.metadata,
 			order: props.order ?? this.fallbackOrder
 		});
 	}
 
 	private readonly onWrapperRef = (wrapper: HTMLElement | null) => {
-		if (wrapper && this.props.order === undefined) {
+		this.wrapper = wrapper;
+		if (!wrapper) {
+			return;
+		}
+
+		let { order } = this.props;
+		if (order === undefined) {
 			const prev = getOrder(wrapper.previousElementSibling);
 			const next = getOrder(wrapper.nextElementSibling);
 
 			/* eslint-disable no-negated-condition */
 			if (prev !== undefined && next !== undefined) {
-				this.fallbackOrder = Math.trunc((next - prev) / 2);
+				order = Math.trunc((next - prev) / 2);
 			}
 			else if (prev !== undefined) {
-				this.fallbackOrder = prev + 1;
+				order = prev + 1;
 			}
 			else if (next !== undefined) {
-				this.fallbackOrder = next - 1;
+				order = next - 1;
 			}
 			else {
-				this.fallbackOrder = 0;
+				order = 0;
 			}
-
-			wrapper.dataset.order = '' + this.fallbackOrder;
 		}
 
-		this.wrapper = wrapper;
+		wrapper.dataset.order = '' + order;
+		this.fallbackOrder = order;
 	};
 
 	public static readonly contextType = SlideshowResource.contextType;
