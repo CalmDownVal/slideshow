@@ -79,8 +79,7 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 
 		const {
 			direction = SlideshowDirection.TopToBottom,
-			scrollable,
-			units
+			scrollable
 		} = this.props;
 
 		bemUpdate(this.wrapper.classList, 'slideshow', {
@@ -92,9 +91,20 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 			'right-to-left': direction === SlideshowDirection.RightToLeft
 		});
 
-		const multiplier = units === SlideshowUnit.Pixels ? 1 : this.size;
-		this.wrapper.style.setProperty('--slideshow-length', px(layout.totalLength * multiplier));
-		this.wrapper.style.setProperty('--slideshow-unit', px(multiplier));
+		let unit;
+		switch (this.props.units) {
+			case SlideshowUnit.Pixels:
+				unit = '1px';
+				break;
+
+			// case SlideshowUnit.ViewportSize:
+			default:
+				unit = '100%';
+				break;
+		}
+
+		this.wrapper.style.setProperty('--slideshow-length', '' + layout.totalLength);
+		this.wrapper.style.setProperty('--slideshow-unit', unit);
 	}
 
 	protected updateSlideshow(
@@ -166,8 +176,4 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 	};
 
 	public static readonly contextType = SlideshowResource.contextType;
-}
-
-function px(length: number) {
-	return Math.round(length) + 'px';
 }

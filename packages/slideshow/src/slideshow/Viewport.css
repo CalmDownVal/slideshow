@@ -31,12 +31,12 @@
 
 .slideshow--left-to-right > .slideshow__expander,
 .slideshow--right-to-left > .slideshow__expander {
-	width: var(--slideshow-length);
+	width: calc(var(--slideshow-length) * var(--slideshow-unit));
 	height: 100%;
 }
 
 .slideshow--top-to-bottom > .slideshow__expander,
 .slideshow--bottom-to-top > .slideshow__expander {
 	width: 100%;
-	height: var(--slideshow-length);
+	height: calc(var(--slideshow-length) * var(--slideshow-unit));
 }
