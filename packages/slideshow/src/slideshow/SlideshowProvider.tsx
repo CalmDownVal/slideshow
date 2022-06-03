@@ -4,7 +4,7 @@ import { mergeSort } from '~/utils/mergeSort';
 import { createSignal } from '~/utils/Signal';
 
 import type { Slide } from './Slide';
-import type { SlideConfig, ViewportConfig } from './types';
+import type { SlideConfig, SlideInfo, ViewportConfig, ViewportInfo } from './types';
 import type { Viewport } from './Viewport';
 
 export interface SlideshowProviderProps {
@@ -201,14 +201,6 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 			this.navigationChanged();
 		}
 	};
-}
-
-export interface SlideInfo<TMetadata = any> extends Readonly<SlideConfig<TMetadata>> {
-	readonly component: Slide;
-}
-
-interface ViewportInfo extends Readonly<ViewportConfig> {
-	readonly component: Viewport;
 }
 
 function byOrderAsc(a: SlideInfo, b: SlideInfo) {

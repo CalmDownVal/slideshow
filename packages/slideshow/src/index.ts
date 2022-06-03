@@ -5,6 +5,7 @@ export * from './hooks/useProgression';
 export * from './slideshow/Slide';
 export * from './slideshow/SlideshowProvider';
 export * from './slideshow/Viewport';
+export * from './slideshow/types';
 
 export * from './utils/JSAnimation';
 export * from './utils/mergeSort';

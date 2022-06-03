@@ -1,6 +1,7 @@
 import { useContext } from 'preact/hooks';
 
-import { SlideInfo, SlideshowContext } from '~/slideshow/SlideshowProvider';
+import { SlideshowContext } from '~/slideshow/SlideshowProvider';
+import type { SlideInfo } from '~/slideshow/types';
 
 import { useTrackingProxy } from './useTrackingProxy';
 

@@ -16,7 +16,7 @@ export function createSignal<T = void>(): Signal<T> {
 		}
 	};
 
-	signal.listeners = [] as Listener<T>[];
+	signal.listeners = listeners;
 	return signal;
 }
 
