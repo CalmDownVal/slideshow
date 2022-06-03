@@ -1,8 +1,11 @@
 import { Component, createContext, h, RenderableProps } from 'preact';
 
 import { mergeSort } from '~/utils/mergeSort';
+import { createSignal } from '~/utils/Signal';
 
-import type { LayoutComponent, SlideConfig, SlideLayout, ViewportConfig, ViewportLayout } from './types';
+import type { Slide } from './Slide';
+import type { SlideConfig, ViewportConfig } from './types';
+import type { Viewport } from './Viewport';
 
 export interface SlideshowProviderProps {
 	readonly unmountThreshold?: number;
@@ -12,13 +15,15 @@ export interface SlideshowProviderProps {
 export const SlideshowContext = createContext<SlideshowProvider | null>(null);
 
 export class SlideshowProvider extends Component<SlideshowProviderProps> {
-	public slides: SlideInfo[] = [];
+	public readonly navigationChanged = createSignal();
+	public activeIndex = -1;
+	public slides: readonly SlideInfo[] = [];
 
-	private readonly slideMap = new Map<LayoutComponent<SlideLayout>, SlideInfo>();
-
-	private slidesDirty = false;
-	private viewport: ViewportInfo | null = null;
+	private readonly slideMap = new Map<Slide, SlideInfo>();
 	private frame?: number;
+	private slideListDirty = false;
+	private slideOrderDirty = false;
+	private viewport: ViewportInfo | null = null;
 
 	public shouldComponentUpdate(nextProps: RenderableProps<SlideshowProviderProps>) {
 		return this.props.children !== nextProps.children;
@@ -32,52 +37,52 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 		);
 	}
 
-	public setSlide(slide: LayoutComponent<SlideLayout>, config: SlideConfig, isFrame?: boolean) {
-		let info = this.slideMap.get(slide);
-		if (!info) {
-			info = {
-				component: slide,
-				dock: 0,
-				length: 1,
-				order: 0,
-				isMounted: true
+	public setSlide(slide: Slide, config: SlideConfig<any>, isFrame?: boolean) {
+		const existing = this.slideMap.get(slide);
+		if (!existing) {
+			const newSlide = {
+				...config,
+				component: slide
 			};
 
-			this.slideMap.set(slide, info);
-			this.slides.push(info);
-			this.slidesDirty = true;
+			this.slideMap.set(slide, newSlide);
+			this.slides = this.slides.concat(newSlide);
+			this.slideListDirty = true;
+			this.slideOrderDirty = true;
+		}
+		else if (!apply(existing, config)) {
+			return;
 		}
 
-		if (apply(info, config)) {
-			this.update(isFrame);
-		}
+		this.update(isFrame);
 	}
 
-	public unsetSlide(slide: LayoutComponent<SlideLayout>) {
+	public unsetSlide(slide: Slide) {
 		if (this.slideMap.delete(slide)) {
 			const index = this.slides.findIndex(info => info.component === slide);
-			this.slides.splice(index, 1);
+			const copy = this.slides.slice();
+			copy.splice(index, 1);
+			this.slides = copy;
+			this.slideListDirty = true;
 			this.update();
 		}
 	}
 
-	public setViewport(viewport: LayoutComponent<ViewportLayout>, config: ViewportConfig, isFrame?: boolean) {
+	public setViewport(viewport: Viewport, config: ViewportConfig, isFrame?: boolean) {
 		if (this.viewport?.component !== viewport) {
 			this.viewport = {
-				component: viewport,
-				offset: 0,
-				size: 1,
-				paddingStart: 0,
-				paddingEnd: 0
+				...config,
+				component: viewport
 			};
 		}
-
-		if (apply(this.viewport, config)) {
-			this.update(isFrame);
+		else if (!apply(this.viewport, config)) {
+			return;
 		}
+
+		this.update(isFrame);
 	}
 
-	public unsetViewport(viewport: LayoutComponent<ViewportLayout>) {
+	public unsetViewport(viewport: Viewport) {
 		if (this.viewport?.component === viewport) {
 			this.viewport = null;
 		}
@@ -103,27 +108,18 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 			return;
 		}
 
-		if (this.slidesDirty) {
+		if (this.slideOrderDirty) {
 			this.slides = mergeSort(this.slides, byOrderAsc);
-			this.slidesDirty = false;
+			this.slideOrderDirty = false;
 		}
 
 		const { slides, viewport } = this;
 		const count = slides.length;
 
-		// Pass 1: get the total slide dock and length sum
+		// Step 1: find the top slide
 		// ---
 
-		let totalDockAndLength = 0;
-		for (let i = 0; i < count; ++i) {
-			totalDockAndLength += slides[i].dock + slides[i].length;
-		}
-
-		// Pass 2: find the top slide
-		// ---
-
-		const totalPadding = viewport.paddingStart + viewport.paddingEnd;
-		const offset = Math.min(totalDockAndLength + totalPadding, Math.abs(viewport.offset));
+		const offset = Math.abs(viewport.offset);
 
 		let lengthStart = 0;
 		let dockStart = 0;
@@ -150,7 +146,7 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 			lengthStart += length;
 		}
 
-		// Pass 3: dispatch layout calls
+		// Step 2: dispatch layout calls
 		// ---
 
 		const positionOffset = viewport.paddingStart - lengthStart;
@@ -162,7 +158,7 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 
 		let position = 0;
 		let bestScore = 0;
-		let bestSlide = null;
+		let bestSlide = -1;
 
 		for (let i = 0; i < count; ++i) {
 			const slide = slides[i];
@@ -174,7 +170,7 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 			const score = Math.min(visibleLength / slide.length, 1);
 			if (score > bestScore) {
 				bestScore = score;
-				bestSlide = slide;
+				bestSlide = i;
 			}
 
 			slide.component.updateLayout({
@@ -193,15 +189,26 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 			expandStart: dockStart + viewport.paddingStart,
 			expandEnd: dockEnd + viewport.paddingEnd
 		});
+
+		// Step 3: Update navigation
+		// ---
+
+		const hasNavChanged = this.slideListDirty || this.activeIndex !== bestSlide;
+		this.slideListDirty = false;
+		this.activeIndex = bestSlide;
+
+		if (hasNavChanged) {
+			this.navigationChanged();
+		}
 	};
 }
 
-interface SlideInfo extends Readonly<SlideConfig> {
-	readonly component: LayoutComponent<SlideLayout>;
+export interface SlideInfo<TMetadata = any> extends Readonly<SlideConfig<TMetadata>> {
+	readonly component: Slide;
 }
 
 interface ViewportInfo extends Readonly<ViewportConfig> {
-	readonly component: LayoutComponent<ViewportLayout>;
+	readonly component: Viewport;
 }
 
 function byOrderAsc(a: SlideInfo, b: SlideInfo) {

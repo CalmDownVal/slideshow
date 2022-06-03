@@ -7,7 +7,7 @@ export function Navigation() {
 	const nav = useNavigation<string>();
 	return (
 		<ul class='navigation'>
-			{nav.slides.map(({ metadata }, index) => (
+			{nav.slides.map((metadata, index) => (
 				<li
 					key={index}
 					class={bem('navigation__item', { active: index === nav.activeIndex })}

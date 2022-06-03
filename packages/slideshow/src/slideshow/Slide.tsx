@@ -1,5 +1,6 @@
 import { createContext, ComponentType, h } from 'preact';
 
+import { createSignal } from '~/utils/Signal';
 import { bem, cx } from '~/utils/style';
 
 import type { SlideshowProvider } from './SlideshowProvider';
@@ -27,8 +28,13 @@ export interface SlideState {
 export const SlideContext = createContext<Slide | null>(null);
 
 export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProps, SlideState> {
-	public readonly state = {
-		canUnmount: false
+	public readonly state = { canUnmount: false };
+	public readonly progressionChanged = createSignal();
+	public readonly progression = {
+		appear: 0,
+		main: 0,
+		dock: 0,
+		disappear: 0
 	};
 
 	private fallbackOrder = 0;
@@ -95,6 +101,7 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 		context?.setSlide(this, {
 			dock: props.dock ?? 0,
 			length: props.length ?? 1,
+			metadata: props.metadata,
 			order: props.order ?? this.fallbackOrder,
 			isMounted: !this.state.canUnmount
 		});

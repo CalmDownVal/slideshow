@@ -1,15 +1,12 @@
-export interface LayoutComponent<T> {
-	updateLayout(layout: Readonly<T>): void;
-}
-
-export interface SlideConfig {
+export interface SlideConfig<TMetadata> {
 	dock: number;
 	length: number;
+	metadata: TMetadata;
 	order: number;
 	isMounted: boolean;
 }
 
-export interface SlideLayout extends Readonly<SlideConfig> {
+export interface SlideLayout extends Readonly<SlideConfig<any>> {
 	canUnmount: boolean;
 	isInvisible: boolean;
 	position: number;

@@ -1,9 +1,8 @@
 import { Component } from 'preact';
 
 import { SlideshowContext, SlideshowProvider } from './SlideshowProvider';
-import type { LayoutComponent } from './types';
 
-export abstract class SlideshowResource<TLayout, TProps = {}, TState = {}> extends Component<TProps, TState> implements LayoutComponent<TLayout> {
+export abstract class SlideshowResource<TLayout, TProps = {}, TState = {}> extends Component<TProps, TState> {
 	declare public context: SlideshowProvider | null;
 
 	protected layout: TLayout | null = null;
