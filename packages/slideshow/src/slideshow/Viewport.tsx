@@ -30,6 +30,8 @@ export interface ViewportProps {
 	readonly scrollable?: boolean;
 	readonly paddingStart?: number;
 	readonly paddingEnd?: number;
+	readonly position?: number;
+	readonly onPositionChange?: (position: number) => void;
 }
 
 export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
@@ -80,6 +82,10 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 		}
 
 		const prevProps = this.props;
+		if (prevProps.position !== nextProps.position && nextProps.position !== undefined) {
+			this.setOffset(nextProps.position * this.unit * (this.layout?.totalLength ?? 1));
+		}
+
 		return (
 			prevProps.children !== nextProps.children ||
 			prevProps.scrollable !== nextProps.scrollable ||
@@ -163,12 +169,17 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 
 	private setOffset(offset: number, isFrame?: boolean) {
 		// round to physical pixels (may result in decimals when pixel ratio is not 1)
+		const newOffset = Math.round(offset * devicePixelRatio) / devicePixelRatio;
+		if (this.offset === newOffset) {
+			return;
+		}
+
 		this.offset = Math.round(offset * devicePixelRatio) / devicePixelRatio;
 
 		const { isHorizontal } = this;
 		this.wrapper?.scrollTo(
-			isHorizontal ? this.offset : 0,
-			isHorizontal ? 0 : this.offset
+			isHorizontal ? newOffset : 0,
+			isHorizontal ? 0 : newOffset
 		);
 
 		this.updateSlideshow(isFrame);
@@ -182,11 +193,8 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 
 		this.wrapper = wrapper;
 		if (wrapper) {
-			// Because the callback of ResizeObserver may not get fired soon enough,
-			// we grab the initial size now.
-			this.size = this.isHorizontal
-				? this.wrapper!.clientWidth
-				: this.wrapper!.clientHeight;
+			// Because the callback of ResizeObserver may not get fired soon enough, we grab the initial size now.
+			this.size = this.isHorizontal ? this.wrapper!.clientWidth : this.wrapper!.clientHeight;
 
 			wrapper.addEventListener('scroll', this.onScroll, { passive: true });
 			this.observer ??= new ResizeObserver(this.onResizeObserved);
@@ -200,12 +208,13 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 			this.offset = newOffset;
 			this.updateSlideshow();
 		}
+
+		this.props.onPositionChange?.(newOffset / this.unit / (this.layout?.totalLength ?? 1));
 	};
 
 	private readonly onResizeObserved = (entries: readonly ResizeObserverEntry[]) => {
-		const { isHorizontal } = this;
 		const entry = entries[0].contentRect;
-		const newSize = isHorizontal ? entry.width : entry.height;
+		const newSize = this.isHorizontal ? entry.width : entry.height;
 		const newOffset = newSize * this.offset / this.size;
 
 		this.size = newSize;

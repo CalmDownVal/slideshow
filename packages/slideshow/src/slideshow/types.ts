@@ -31,6 +31,7 @@ export interface ViewportLayout extends Readonly<ViewportConfig> {
 	isDocked: boolean;
 	expandStart: number;
 	expandEnd: number;
+	totalLength: number;
 }
 
 export interface ViewportInfo extends Readonly<ViewportConfig> {

@@ -199,7 +199,8 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 			...viewport,
 			isDocked,
 			expandStart: dockStart + viewport.paddingStart,
-			expandEnd: dockEnd + viewport.paddingEnd
+			expandEnd: dockEnd + viewport.paddingEnd,
+			totalLength: lengthSum + dockSum + viewport.paddingStart + viewport.paddingEnd
 		});
 
 		// Step 3: Update navigation
