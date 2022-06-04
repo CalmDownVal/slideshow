@@ -14,7 +14,7 @@ export function Navigation() {
 				>
 					<a
 						class='navigation__button'
-						// onClick={() => nav.goTo(index)}
+						onClick={() => nav.goTo(index)}
 						type='button'
 					>
 						{slide.metadata}

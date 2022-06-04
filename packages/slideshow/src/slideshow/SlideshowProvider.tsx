@@ -1,5 +1,6 @@
 import { Component, createContext, h, RenderableProps } from 'preact';
 
+import type { JSAnimationOptions } from '~/utils/JSAnimation';
 import { mergeSort } from '~/utils/mergeSort';
 import { createSignal } from '~/utils/Signal';
 
@@ -18,12 +19,12 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 	public readonly navigationChanged = createSignal();
 	public activeIndex = -1;
 	public slides: readonly SlideInfo[] = [];
+	public viewport: ViewportInfo | null = null;
 
 	private readonly slideMap = new Map<Slide, SlideInfo>();
 	private frame?: number;
 	private slideListDirty = false;
 	private slideOrderDirty = false;
-	private viewport: ViewportInfo | null = null;
 
 	public shouldComponentUpdate(nextProps: RenderableProps<SlideshowProviderProps>) {
 		return this.props.children !== nextProps.children;
@@ -42,7 +43,8 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 		if (!existing) {
 			const newSlide = {
 				...config,
-				component: slide
+				component: slide,
+				scrollOffset: 0
 			};
 
 			this.slideMap.set(slide, newSlide);
@@ -88,6 +90,13 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 		}
 	}
 
+	public goTo(index: number, animation?: JSAnimationOptions) {
+		return this.viewport?.component.scrollTo(
+			this.slides[index].scrollOffset,
+			animation
+		);
+	}
+
 	private update(isFrame = false) {
 		if (isFrame) {
 			if (this.frame !== undefined) {
@@ -119,7 +128,7 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 		// Step 1: find the top slide
 		// ---
 
-		const offset = Math.abs(viewport.offset);
+		const viewOffset = Math.abs(viewport.offset);
 
 		let lengthStart = 0;
 		let dockStart = 0;
@@ -128,8 +137,8 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 
 		for (let i = 0; i < count; ++i) {
 			const { dock, length } = slides[i];
-			if (dockStart + lengthStart + dock + length >= offset) {
-				isDocked = dockStart + lengthStart + dock >= offset;
+			if (dockStart + lengthStart + dock + length >= viewOffset) {
+				isDocked = dockStart + lengthStart + dock >= viewOffset;
 				if (!isDocked) {
 					dockStart += dock;
 					++i;
@@ -150,21 +159,22 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 		// ---
 
 		const positionOffset = viewport.paddingStart - lengthStart;
-		const visibilityOffset = viewport.paddingStart - (isDocked ? lengthStart : offset - dockStart);
+		const visibilityOffset = viewport.paddingStart - (isDocked ? lengthStart : viewOffset - dockStart);
 		const {
 			unmountThreshold = 1.5,
 			remountThreshold = 0.5
 		} = this.props;
 
-		let position = 0;
+		let lengthSum = 0;
+		let dockSum = 0;
 		let bestScore = 0;
 		let bestSlide = -1;
 
 		for (let i = 0; i < count; ++i) {
 			const slide = slides[i];
 			const visibleLength =
-				Math.min(viewport.size, visibilityOffset + position + slide.length) -
-				Math.max(0, visibilityOffset + position);
+				Math.min(viewport.size, visibilityOffset + lengthSum + slide.length) -
+				Math.max(0, visibilityOffset + lengthSum);
 
 			// clamping to ≤1 avoids float rounding errors
 			const score = Math.min(visibleLength / slide.length, 1);
@@ -173,14 +183,16 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 				bestSlide = i;
 			}
 
+			slide.scrollOffset = lengthSum + dockSum;
 			slide.component.updateLayout({
 				...slide,
-				position: positionOffset + position,
+				position: positionOffset + lengthSum,
 				isInvisible: visibleLength <= 0,
 				canUnmount: -visibleLength / viewport.size >= (slide.isMounted ? unmountThreshold : remountThreshold)
 			});
 
-			position += slide.length;
+			lengthSum += slide.length;
+			dockSum += slide.dock;
 		}
 
 		viewport.component.updateLayout({

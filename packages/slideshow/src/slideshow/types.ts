@@ -17,6 +17,7 @@ export interface SlideLayout extends Readonly<SlideConfig<any>> {
 
 export interface SlideInfo<TMetadata = any> extends Readonly<SlideConfig<TMetadata>> {
 	readonly component: Slide;
+	scrollOffset: number;
 }
 
 export interface ViewportConfig {

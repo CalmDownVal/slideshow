@@ -1,5 +1,6 @@
 import { h, RenderableProps } from 'preact';
 
+import { JSAnimation, JSAnimationOptions } from '~/utils/JSAnimation';
 import { bem, cx } from '~/utils/style';
 
 import type { SlideshowProvider } from './SlideshowProvider';
@@ -32,6 +33,8 @@ export interface ViewportProps {
 }
 
 export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
+	private readonly animation: JSAnimation;
+
 	private wrapper: HTMLElement | null = null;
 	private observer: ResizeObserver | null = null;
 	private offset = 0;
@@ -43,6 +46,22 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 			direction === SlideshowDirection.Row ||
 			direction === SlideshowDirection.RowReverse
 		);
+	}
+
+	public get unit() {
+		switch (this.props.units) {
+			case SlideshowUnit.Pixels:
+				return 1;
+
+			// case SlideshowUnit.ViewportSize:
+			default:
+				return this.size;
+		}
+	}
+
+	public constructor(props: ViewportProps) {
+		super(props);
+		this.animation = new JSAnimation(offset => this.setOffset(offset, true));
 	}
 
 	public componentWillUnmount() {
@@ -95,6 +114,16 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 		);
 	}
 
+	public scrollTo(offset: number, animationOptions?: JSAnimationOptions) {
+		this.animation.start({
+			...animationOptions,
+			valueFrom: this.offset,
+			valueTo: offset * this.unit
+		});
+
+		return this.animation;
+	}
+
 	protected onUpdateLayout(layout: Readonly<ViewportLayout>) {
 		if (!this.wrapper) {
 			return;
@@ -119,33 +148,30 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 		classList.toggle('slideshow--docked', layout.isDocked);
 	}
 
-	protected onUpdateSlideshow(context: SlideshowProvider | null, props: ViewportProps) {
+	protected onUpdateSlideshow(context: SlideshowProvider | null, props: ViewportProps, isFrame?: boolean) {
 		if (context !== this.context) {
 			this.context?.unsetViewport(this);
 		}
 
-		let offset;
-		let size;
-
-		switch (this.props.units) {
-			case SlideshowUnit.Pixels:
-				offset = this.offset;
-				size = this.size;
-				break;
-
-			// case SlideshowUnit.ViewportSize:
-			default:
-				offset = this.offset / this.size;
-				size = 1;
-				break;
-		}
-
 		context?.setViewport(this, {
-			offset,
-			size,
+			offset: this.offset / this.unit,
+			size: this.size / this.unit,
 			paddingStart: props.paddingStart ?? 0,
 			paddingEnd: props.paddingEnd ?? 0
-		});
+		}, isFrame);
+	}
+
+	private setOffset(offset: number, isFrame?: boolean) {
+		// round to physical pixels (may result in decimals when pixel ratio is not 1)
+		this.offset = Math.round(offset * devicePixelRatio) / devicePixelRatio;
+
+		const { isHorizontal } = this;
+		this.wrapper?.scrollTo(
+			isHorizontal ? this.offset : 0,
+			isHorizontal ? 0 : this.offset
+		);
+
+		this.updateSlideshow(isFrame);
 	}
 
 	private readonly onWrapperRef = (wrapper: HTMLElement | null) => {
@@ -169,18 +195,22 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 	};
 
 	private readonly onScroll = () => {
-		this.offset = this.isHorizontal ? this.wrapper!.scrollLeft : this.wrapper!.scrollTop;
-		if (this.props.scrollable) {
+		const newOffset = this.isHorizontal ? this.wrapper!.scrollLeft : this.wrapper!.scrollTop;
+		if (this.offset !== newOffset) {
+			this.offset = newOffset;
 			this.updateSlideshow();
 		}
 	};
 
 	private readonly onResizeObserved = (entries: readonly ResizeObserverEntry[]) => {
+		const { isHorizontal } = this;
 		const entry = entries[0].contentRect;
-		this.size = this.isHorizontal ? entry.width : entry.height;
-		if (this.props.units === SlideshowUnit.Pixels) {
-			this.updateSlideshow();
-		}
+		const newSize = isHorizontal ? entry.width : entry.height;
+		const newOffset = newSize * this.offset / this.size;
+
+		this.size = newSize;
+		this.setOffset(newOffset);
+		this.updateSlideshow();
 	};
 
 	public static readonly contextType = SlideshowResource.contextType;

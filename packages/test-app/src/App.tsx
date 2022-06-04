@@ -13,16 +13,16 @@ export function App() {
 		<SlideshowProvider>
 			<Navigation />
 			<Viewport
-				direction={SlideshowDirection.Column}
-				paddingStart={0.5}
-				paddingEnd={0.5}
+				direction={SlideshowDirection.Row}
+				paddingStart={0.25}
+				paddingEnd={0.25}
 				scrollable
 			>
-				<Slide component={Content} metadata='1' />
-				<Slide component={Content} metadata='2' length={1} dock={0.5} />
-				<Slide component={Content} metadata='3' length={1} dock={0.5} />
-				<Slide component={Content} metadata='4' length={1} dock={0.5} />
-				<Slide component={Content} metadata='5' />
+				<Slide component={Content} metadata='1' length={0.5} dock={1} />
+				<Slide component={Content} metadata='2' length={0.5} dock={1} />
+				<Slide component={Content} metadata='3' length={0.5} dock={1} />
+				<Slide component={Content} metadata='4' length={0.5} dock={1} />
+				<Slide component={Content} metadata='5' length={0.5} dock={1} />
 			</Viewport>
 		</SlideshowProvider>
 	);

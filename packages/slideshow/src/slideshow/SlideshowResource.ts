@@ -16,11 +16,11 @@ export abstract class SlideshowResource<TLayout, TProps = {}, TState = {}> exten
 	}
 
 	public componentWillUnmount() {
-		this.updateSlideshow(null);
+		this.onUpdateSlideshow(null, this.props);
 	}
 
 	public shouldComponentUpdate(nextProps: TProps, _nextState: TState, nextContext: SlideshowProvider | null) {
-		this.updateSlideshow(nextContext, nextProps);
+		this.onUpdateSlideshow(nextContext, nextProps);
 		return this.context !== nextContext;
 	}
 
@@ -43,15 +43,12 @@ export abstract class SlideshowResource<TLayout, TProps = {}, TState = {}> exten
 		this.onUpdateLayout(layout);
 	}
 
-	public updateSlideshow(
-		context: SlideshowProvider | null = this.context,
-		props: TProps = this.props
-	) {
-		this.onUpdateSlideshow(context, props);
+	public updateSlideshow(isFrame?: boolean) {
+		this.onUpdateSlideshow(this.context, this.props, isFrame);
 	}
 
 	protected abstract onUpdateLayout(layout: Readonly<TLayout>): void;
-	protected abstract onUpdateSlideshow(context: SlideshowProvider | null, props: TProps): void;
+	protected abstract onUpdateSlideshow(context: SlideshowProvider | null, props: TProps, isFrame?: boolean): void;
 
 	public static readonly contextType = SlideshowContext;
 }

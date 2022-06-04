@@ -93,7 +93,7 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 		classList.toggle('slideshow__slide--invisible', layout.isInvisible);
 	}
 
-	protected onUpdateSlideshow(context: SlideshowProvider | null, props: SlideProps) {
+	protected onUpdateSlideshow(context: SlideshowProvider | null, props: SlideProps, isFrame?: boolean) {
 		if (context !== this.context) {
 			this.context?.unsetSlide(this);
 		}
@@ -104,7 +104,7 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 			metadata: props.metadata,
 			order: props.order ?? this.fallbackOrder,
 			isMounted: !this.state.canUnmount
-		});
+		}, isFrame);
 	}
 
 	private readonly onWrapperRef = (wrapper: HTMLElement | null) => {
