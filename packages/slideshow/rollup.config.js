@@ -39,7 +39,8 @@ export default [
 				runOnce: true
 			}),
 			postcss({
-				extract: 'style.css'
+				extract: 'style.css',
+				minimize: true
 			}),
 			typescript(),
 			externals({
@@ -55,7 +56,8 @@ export default [
 		},
 		plugins: [
 			postcss({
-				extract: false
+				extract: false,
+				inject: false
 			}),
 			typescript(),
 			definitions()

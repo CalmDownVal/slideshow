@@ -21,15 +21,10 @@
 	height: .5rem;
 	background: rgba(0, 0, 0, .5);
 	transform-origin: 0 0;
-	animation-name: progress-scale;
-	animation-timing-function: linear;
-	animation-duration: 1s;
-	animation-fill-mode: both;
-	animation-play-state: paused;
 	will-change: transform;
 }
 
-@keyframes progress-scale {
+@keyframes progress__scale {
 	  0% { transform: scale3d(0, 1, 1); }
 	100% { transform: scale3d(1, 1, 1); }
 }

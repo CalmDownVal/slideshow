@@ -1,3 +1,5 @@
+import { clamp } from './math';
+
 export interface BemModifiers {
 	[name: string]: boolean | null | undefined;
 }
@@ -25,4 +27,14 @@ export function cx() {
 	}
 
 	return classNames;
+}
+
+export function cssAnimation(animationName: string, progress: number) {
+	return {
+		animationDelay: `-${clamp(progress)}s`,
+		animationDuration: '1s',
+		animationFillMode: 'both',
+		animationName,
+		animationPlayState: 'paused'
+	};
 }
