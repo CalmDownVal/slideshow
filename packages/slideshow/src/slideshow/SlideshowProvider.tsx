@@ -1,11 +1,12 @@
 import { Component, createContext, h, RenderableProps } from 'preact';
 
 import type { JSAnimationOptions } from '~/utils/JSAnimation';
+import { clamp } from '~/utils/math';
 import { mergeSort } from '~/utils/mergeSort';
 import { createSignal } from '~/utils/Signal';
 
 import type { Slide } from './Slide';
-import type { SlideConfig, SlideInfo, ViewportConfig, ViewportInfo } from './types';
+import type { Navigation, SlideConfig, SlideInfo, ViewportConfig, ViewportInfo } from './types';
 import type { Viewport } from './Viewport';
 
 export interface SlideshowProviderProps {
@@ -15,7 +16,7 @@ export interface SlideshowProviderProps {
 
 export const SlideshowContext = createContext<SlideshowProvider | null>(null);
 
-export class SlideshowProvider extends Component<SlideshowProviderProps> {
+export class SlideshowProvider extends Component<SlideshowProviderProps> implements Navigation {
 	public readonly navigationChanged = createSignal();
 	public activeIndex = -1;
 	public slides: readonly SlideInfo[] = [];
@@ -90,12 +91,10 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 		}
 	}
 
-	public goTo(index: number, animation?: JSAnimationOptions) {
-		return this.viewport?.component.scrollTo(
-			this.slides[index].scrollOffset,
-			animation
-		);
-	}
+	public readonly goTo = (index: number, animation?: JSAnimationOptions) => this.viewport?.component.scrollTo(
+		this.slides[index].scrollOffset,
+		animation
+	);
 
 	private update(isFrame = false) {
 		if (isFrame) {
@@ -158,7 +157,6 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 		// Step 2: dispatch layout calls
 		// ---
 
-		const positionOffset = viewport.paddingStart - lengthStart;
 		const visibilityOffset = viewport.paddingStart - (isDocked ? lengthStart : viewOffset - dockStart);
 		const {
 			unmountThreshold = 1.5,
@@ -172,23 +170,55 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 
 		for (let i = 0; i < count; ++i) {
 			const slide = slides[i];
+			const maxVisibleLength = Math.min(viewport.size, slide.length);
 			const visibleLength =
 				Math.min(viewport.size, visibilityOffset + lengthSum + slide.length) -
 				Math.max(0, visibilityOffset + lengthSum);
 
-			// clamping to ≤1 avoids float rounding errors
-			const score = Math.min(visibleLength / slide.length, 1);
-			if (score > bestScore) {
+			// Navigation: find the most relevant slide on screen for navigation
+			const score = clamp(visibleLength / maxVisibleLength);
+			if ((score - bestScore) > Number.EPSILON) {
 				bestScore = score;
 				bestSlide = i;
 			}
 
 			slide.scrollOffset = lengthSum + dockSum;
+
+			// Progression: decide which phase the slide is currently in and calculate the values
+			let remaining = viewport.size - viewport.paddingStart;
+			let j = i;
+
+			let firstPixelAt = slide.scrollOffset - remaining;
+			while (remaining > 0 && --j >= 0) {
+				remaining -= slides[j].length;
+				if (-remaining < Number.EPSILON) {
+					firstPixelAt -= slides[j].dock;
+				}
+			}
+
+			remaining = viewport.size;
+			j = i;
+
+			let lastPixelAt = slide.scrollOffset + viewport.paddingStart + slide.dock + slide.length;
+			while (remaining > 0 && ++j < count) {
+				remaining -= slides[j].length;
+				if (-remaining < Number.EPSILON) {
+					lastPixelAt += slides[j].dock;
+				}
+			}
+
+			const peakVisibilityAt = firstPixelAt + slide.dock + maxVisibleLength;
 			slide.component.updateLayout({
 				...slide,
-				position: positionOffset + lengthSum,
+				position: viewport.paddingStart - lengthStart + lengthSum,
 				isInvisible: visibleLength <= 0,
-				canUnmount: -visibleLength / viewport.size >= (slide.isMounted ? unmountThreshold : remountThreshold)
+				canUnmount: -visibleLength / viewport.size >= (slide.isMounted ? unmountThreshold : remountThreshold),
+				progression: {
+					main: clamp((viewOffset - firstPixelAt) / (lastPixelAt - firstPixelAt)),
+					dock: slide.dock > 0 ? clamp((viewOffset - slide.scrollOffset) / slide.dock) : 0,
+					enter: viewOffset < peakVisibilityAt ? score : 1,
+					leave: viewOffset > peakVisibilityAt ? 1 - score : 0
+				}
 			});
 
 			lengthSum += slide.length;
@@ -198,9 +228,9 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> {
 		viewport.component.updateLayout({
 			...viewport,
 			isDocked,
+			totalLength: lengthSum + dockSum + viewport.paddingStart + viewport.paddingEnd,
 			expandStart: dockStart + viewport.paddingStart,
-			expandEnd: dockEnd + viewport.paddingEnd,
-			totalLength: lengthSum + dockSum + viewport.paddingStart + viewport.paddingEnd
+			expandEnd: dockEnd + viewport.paddingEnd
 		});
 
 		// Step 3: Update navigation

@@ -5,7 +5,7 @@ import { bem, cx } from '~/utils/style';
 
 import type { SlideshowProvider } from './SlideshowProvider';
 import { SlideshowResource } from './SlideshowResource';
-import type { SlideLayout } from './types';
+import { SlideLayout } from './types';
 
 export interface SlideComponentProps<TMeta = any> {
 	readonly metadata?: TMeta;
@@ -30,12 +30,6 @@ export const SlideContext = createContext<Slide | null>(null);
 export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProps, SlideState> {
 	public readonly state = { canUnmount: false };
 	public readonly progressionChanged = createSignal();
-	public readonly progression = {
-		appear: 0,
-		main: 0,
-		dock: 0,
-		disappear: 0
-	};
 
 	private fallbackOrder = 0;
 	private wrapper: HTMLElement | null = null;
@@ -91,6 +85,8 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 		style.setProperty('--ss-position', '' + layout.position);
 		style.setProperty('--ss-length', '' + layout.length);
 		classList.toggle('slideshow__slide--invisible', layout.isInvisible);
+
+		this.progressionChanged();
 	}
 
 	protected onUpdateSlideshow(context: SlideshowProvider | null, props: SlideProps, isFrame?: boolean) {

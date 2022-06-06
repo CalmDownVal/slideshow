@@ -1,25 +1,25 @@
 import { useContext } from 'preact/hooks';
 
 import { SlideContext } from '~/slideshow/Slide';
+import type { Progression } from '~/slideshow/types';
 
 import { useTrackingProxy } from './useTrackingProxy';
 
-export interface Progression {
-	readonly appear: number;
-	readonly main: number;
-	readonly dock: number;
-	readonly disappear: number;
-}
-
-const keys = [ 'appear', 'main', 'dock', 'disappear' ] as const;
+const keys = [ 'main', 'dock', 'enter', 'leave' ] as const;
+const fallback: Progression = {
+	main: 0,
+	dock: 0,
+	enter: 0,
+	leave: 0
+};
 
 export function useProgression(): Progression {
-	const slide = useContext(SlideContext);
+	const slide = useContext(SlideContext)!;
 	const progression = useTrackingProxy(
-		slide?.progression,
-		slide?.progressionChanged,
+		() => slide.layout?.progression ?? fallback,
+		slide.progressionChanged,
 		keys
 	);
 
-	return progression!;
+	return progression;
 }

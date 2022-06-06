@@ -1,3 +1,5 @@
+import type { JSAnimation, JSAnimationOptions } from '~/utils/JSAnimation';
+
 import type { Slide } from './Slide';
 import type { Viewport } from './Viewport';
 
@@ -13,6 +15,7 @@ export interface SlideLayout extends Readonly<SlideConfig<any>> {
 	canUnmount: boolean;
 	isInvisible: boolean;
 	position: number;
+	progression: Progression;
 }
 
 export interface SlideInfo<TMetadata = any> extends Readonly<SlideConfig<TMetadata>> {
@@ -36,4 +39,17 @@ export interface ViewportLayout extends Readonly<ViewportConfig> {
 
 export interface ViewportInfo extends Readonly<ViewportConfig> {
 	readonly component: Viewport;
+}
+
+export interface Navigation<TMetadata = any> {
+	activeIndex: number;
+	slides: readonly SlideInfo<TMetadata>[];
+	goTo(index: number, animation?: JSAnimationOptions): JSAnimation | undefined;
+}
+
+export interface Progression {
+	main: number;
+	dock: number;
+	enter: number;
+	leave: number;
 }

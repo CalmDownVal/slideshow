@@ -120,9 +120,9 @@ export class Viewport extends SlideshowResource<ViewportLayout, ViewportProps> {
 		);
 	}
 
-	public scrollTo(offset: number, animationOptions?: JSAnimationOptions) {
+	public scrollTo(offset: number, animation?: JSAnimationOptions) {
 		this.animation.start({
-			...animationOptions,
+			...animation,
 			valueFrom: this.offset,
 			valueTo: offset * this.unit
 		});

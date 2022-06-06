@@ -6,24 +6,22 @@ export interface EasingFunction {
 	(x: number): number;
 }
 
-interface JSAnimationProps {
-	duration: number;
-	easing: EasingFunction;
-	valueFrom: number;
-	valueTo: number;
+export interface JSAnimationOptions {
+	duration?: number;
+	easing?: EasingFunction;
+	valueFrom?: number;
+	valueTo?: number;
 }
 
-export type JSAnimationOptions = Partial<JSAnimationProps>;
-
-export class JSAnimation implements JSAnimationProps {
+export class JSAnimation implements Required<JSAnimationOptions> {
 	public duration = 500;
 	public easing: EasingFunction = smoothStep;
-	public valueFrom = 0.0;
-	public valueTo = 1.0;
+	public valueFrom = 0;
+	public valueTo = 1;
 
 	private frame?: number;
 	private startTime?: number;
-	private lastValue = 0.0;
+	private lastValue = 0;
 
 	public constructor(
 		private readonly callback: JSAnimationCallback,

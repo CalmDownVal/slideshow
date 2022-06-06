@@ -3,7 +3,7 @@ import { h } from 'preact';
 
 import './Navigation.css';
 
-export function Navigation() {
+export const Navigation = () => {
 	const nav = useNavigation<string>();
 	return (
 		<ul class='navigation'>
@@ -23,4 +23,4 @@ export function Navigation() {
 			))}
 		</ul>
 	);
-}
+};

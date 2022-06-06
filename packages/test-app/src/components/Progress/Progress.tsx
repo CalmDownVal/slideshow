@@ -1,4 +1,3 @@
-import { Progression } from '@calmdownval/slideshow';
 import { h } from 'preact';
 
 import './Progress.css';
@@ -8,15 +7,13 @@ export interface ProgressProps {
 	readonly value: number;
 }
 
-export function Progress({ label, value }: ProgressProps) {
-	return (
-		<div class='progress'>
-			<span class='progress__label'>
-				{label}
-			</span>
-			<div class='progress__wrapper'>
-				<div class='progress__indicator' style={Progression.animate('progress-scale', value)} />
-			</div>
+export const Progress = ({ label, value }: ProgressProps) => (
+	<div class='progress'>
+		<div class='progress__wrapper'>
+			<div class='progress__indicator' style={{ animationDelay: `-${value}s` }} />
 		</div>
-	);
-}
+		<span class='progress__label'>
+			{label}
+		</span>
+	</div>
+);

@@ -9,17 +9,19 @@ export interface TransitionsProps {
 	readonly metadata?: string;
 }
 
-export function Transitions({ metadata }: TransitionsProps) {
+export const Transitions = ({ metadata }: TransitionsProps) => {
 	const progression = useProgression();
 	return (
 		<div class='transitions'>
 			<h2 class='transitions__header'>
 				{metadata}
 			</h2>
-			<Progress value={progression.appear} label='Appear' />
-			<Progress value={progression.main} label='Main' />
-			<Progress value={progression.dock} label='Dock' />
-			<Progress value={progression.disappear} label='Disappear' />
+			<div class='transitions__list'>
+				<Progress value={progression.main} label='Main' />
+				<Progress value={progression.dock} label='Dock' />
+				<Progress value={progression.enter} label='Enter' />
+				<Progress value={progression.leave} label='Leave' />
+			</div>
 		</div>
 	);
-}
+};

@@ -5,7 +5,7 @@ import { SlideshowContext, SlideshowProvider } from './SlideshowProvider';
 export abstract class SlideshowResource<TLayout, TProps = {}, TState = {}> extends Component<TProps, TState> {
 	declare public context: SlideshowProvider | null;
 
-	protected layout: TLayout | null = null;
+	public layout: TLayout | null = null;
 
 	public componentDidMount() {
 		this.updateSlideshow();

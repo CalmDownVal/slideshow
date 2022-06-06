@@ -8,6 +8,7 @@ export * from './slideshow/Viewport';
 export * from './slideshow/types';
 
 export * from './utils/JSAnimation';
+export * from './utils/math';
 export * from './utils/mergeSort';
 export * from './utils/Signal';
 export * from './utils/style';

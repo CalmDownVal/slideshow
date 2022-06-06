@@ -4,36 +4,30 @@ import { Signal, subscribe } from '~/utils/Signal';
 
 import { useForceUpdate } from './useForceUpdate';
 
-function createTrackingProxy<TSource, TKeys extends keyof TSource>(source: TSource, proxyKeys: readonly TKeys[]) {
+function createTrackingProxy<TSource, TKeys extends keyof TSource>(firstSource: TSource, proxyKeys: readonly TKeys[]) {
 	const accessMap: Record<keyof any, boolean | undefined> = {};
 	const copiedValues: Record<keyof any, any> = {};
-
-	const valueKeys: (keyof TSource)[] = [];
-	const proxy: any = {
-		syncProxiedValues() {
+	const proxy = {
+		syncProxiedValues(source: TSource = firstSource) {
 			let hasTrackedChanges = false;
-			for (let key: keyof TSource, value, i = 0; i < valueKeys.length; ++i) {
-				key = valueKeys[i];
+			for (let key: keyof TSource, value, i = 0; i < proxyKeys.length; ++i) {
+				key = proxyKeys[i];
 				value = source[key];
-				hasTrackedChanges ||= accessMap[key] && copiedValues[key] !== value;
+				if (accessMap[key] && copiedValues[key] !== value) {
+					hasTrackedChanges = true;
+					accessMap[key] = false;
+				}
+
 				copiedValues[key] = value;
-				accessMap[key] = false;
 			}
 
 			return hasTrackedChanges;
 		}
 	};
 
-	for (let key: keyof TSource, value: any, i = 0; i < proxyKeys.length; ++i) {
+	for (let key: keyof TSource, i = 0; i < proxyKeys.length; ++i) {
 		key = proxyKeys[i];
-		value = source[key];
-		if (typeof value === 'function') {
-			proxy[key] = () => value.apply(source, arguments);
-			continue;
-		}
-
-		valueKeys.push(key);
-		copiedValues[key] = value;
+		copiedValues[key] = firstSource[key];
 		Object.defineProperty(proxy, key, {
 			get() {
 				accessMap[key] = true;
@@ -42,28 +36,22 @@ function createTrackingProxy<TSource, TKeys extends keyof TSource>(source: TSour
 		});
 	}
 
-	return proxy as { [K in TKeys]: TSource[K] } & { syncProxiedValues(): boolean };
+	return proxy as { readonly [K in TKeys]: TSource[K] } & { syncProxiedValues(source?: TSource): boolean };
 }
 
 export function useTrackingProxy<TSource, TKeys extends keyof TSource>(
-	source: TSource | null | undefined,
-	sourceChanged: Signal | null | undefined,
+	sourceGetter: () => TSource,
+	sourceChanged: Signal,
 	keys: readonly TKeys[]
 ) {
 	const forceUpdate = useForceUpdate();
-	const proxy = useMemo(() => source && createTrackingProxy(source, keys), [ source, keys ]);
+	const proxy = useMemo(() => createTrackingProxy(sourceGetter(), keys), [ keys ]);
 
-	useLayoutEffect(() => {
-		if (!(proxy && sourceChanged)) {
-			return undefined;
+	useLayoutEffect(() => subscribe(sourceChanged, () => {
+		if (proxy.syncProxiedValues(sourceGetter())) {
+			forceUpdate();
 		}
-
-		return subscribe(sourceChanged, () => {
-			if (proxy.syncProxiedValues()) {
-				forceUpdate();
-			}
-		});
-	}, [ proxy, sourceChanged ]);
+	}), [ proxy, sourceChanged ]);
 
 	return proxy;
 }
