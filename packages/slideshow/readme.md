@@ -58,17 +58,20 @@ edge the slideshow will stop scrolling for the requested length.
 
 ### useProgression hook
 
-This hook returns an instance of `Progression` which provides values indicating
-the individual phases of a slide. Each value ranges from zero to one
-(inclusive).
+This hook returns a progression object with values indicating the individual
+phases of a slide. Each value ranges from zero to one (inclusive).
 
-- **Appear** - from the first pixels of a slide appearing on the screen until it
-  reaches its maximum possible visible area.
-- **Main** - from the time a slide reaches its maximum visible area to the
-  moment its visible area starts decreasing again
-- **Disappear** - from the time a slide starts decreasing in visible area to the
-  moment it completely disappears from the viewport
-- **Dock** - from the start to the end of the docking phase
+- **Main** - from the moment a slide starts entering the screen (0) until it
+  leaves the screen entirely (1).
+- **Dock** - from the start (0) to the end (1) of the docking phase. Always zero
+  when dock is not used.
+- **enter** - from the moment a slide starts entering the screen (0) until it
+  reaches maximum visible area (1).
+- **leave** - from the moment a slide starts leaving the screen (0) until it
+  leaves entirely (1).
+
+This hook will automatically update your component when any of the values you're
+using changes.
 
 Example usage:
 
@@ -89,10 +92,13 @@ export const MyComponent = () => {
 
 ### useNavigation hook
 
-This hook returns an instance of `Navigation` which provides an index of the
-currently active slide (the uppermost slide with the largest relative visible
-area) and a list of slide metadata. It also provides a `goTo` method which can
-be used to scroll to a specific slide programmatically.
+This hook returns a navigation object which provides an index of the currently
+active slide (the uppermost slide with the largest relative visible area) and a
+list of all slides. It also provides a `goTo` method which can be used to scroll
+to a specific slide programmatically.
+
+This hook will automatically update your component when any of the values you're
+using changes.
 
 ## Example
 
