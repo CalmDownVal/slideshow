@@ -1,10 +1,12 @@
 import { bem, useNavigation } from '@calmdownval/slideshow';
 import { h } from 'preact';
 
+import type { SlideMetadata } from '~/types';
+
 import './Navigation.css';
 
 export const Navigation = () => {
-	const nav = useNavigation<string>();
+	const nav = useNavigation<SlideMetadata>();
 	return (
 		<ul class='navigation'>
 			{nav.slides.map((slide, index) => (
@@ -17,7 +19,7 @@ export const Navigation = () => {
 						onClick={() => nav.goTo(index)}
 						type='button'
 					>
-						{slide.metadata}
+						{slide.metadata.title}
 					</a>
 				</li>
 			))}

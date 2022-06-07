@@ -44,9 +44,9 @@ prop to enable scroll bars.
 ### Slide Components
 
 All that's left is to add some slides into the viewport. Each slide requires a
-`component` prop to specify the contents of the slide. This component will
-receive a single prop `metadata` which can be used to pass custom data down to
-the content component.
+`content` prop to specify the contents of the slide. The content component will
+receive a forwarded `metadata` prop which can be used to pass custom data down
+to the content component.
 
 By default each slide will be exactly the size of the viewport along the scroll
 axis. To change this you can set the `length` prop to any value greater than
@@ -61,9 +61,9 @@ edge the slideshow will stop scrolling for the requested length.
 This hook returns a progression object with values indicating the individual
 phases of a slide. Each value ranges from zero to one (inclusive).
 
-- **Main** - from the moment a slide starts entering the screen (0) until it
+- **main** - from the moment a slide starts entering the screen (0) until it
   leaves the screen entirely (1).
-- **Dock** - from the start (0) to the end (1) of the docking phase. Always zero
+- **dock** - from the start (0) to the end (1) of the docking phase. Always zero
   when dock is not used.
 - **enter** - from the moment a slide starts entering the screen (0) until it
   reaches maximum visible area (1).
@@ -105,21 +105,21 @@ using changes.
 This example shows a super simple slideshow
 
 ```tsx
-import { Slide, SlideComponentProps, SlideshowProvider, Viewport } from '@calmdownval/slideshow';
+import { Slide, SlideContentProps, SlideshowProvider, Viewport } from '@calmdownval/slideshow';
 import { h } from 'preact';
 
 import '@calmdownval/slideshow/style.css';
 
-const Content = ({ metadata }: SlideComponentProps<string>) => (
+const TestContent = ({ metadata }: SlideContentProps<string>) => (
   <h2>{metadata}</h2>
 );
 
 export const App = () => (
   <SlideshowProvider>
     <Viewport scrollable>
-      <Slide component={Content} metadata='First' />
-      <Slide component={Content} metadata='Second' />
-      <Slide component={Content} metadata='Third' />
+      <Slide content={TestContent} metadata='First' />
+      <Slide content={TestContent} metadata='Second' />
+      <Slide content={TestContent} metadata='Third' />
     </Viewport>
   </SlideshowProvider>
 );

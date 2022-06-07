@@ -7,16 +7,16 @@ import type { SlideshowProvider } from './SlideshowProvider';
 import { SlideshowResource } from './SlideshowResource';
 import { SlideLayout } from './types';
 
-export interface SlideComponentProps<TMeta = any> {
-	readonly metadata?: TMeta;
+export interface SlideContentProps<TMeta = any> {
+	readonly metadata: TMeta;
 }
 
 export interface SlideProps<TMeta = any> {
 	readonly class?: string;
-	readonly component: ComponentType<SlideComponentProps<TMeta>>;
+	readonly content: ComponentType<SlideContentProps<TMeta>>;
 	readonly dock?: number;
 	readonly length?: number;
-	readonly metadata?: TMeta;
+	readonly metadata: TMeta;
 	readonly order?: number;
 	readonly persist?: boolean;
 }
@@ -27,7 +27,7 @@ export interface SlideState {
 
 export const SlideContext = createContext<Slide | null>(null);
 
-export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProps, SlideState> {
+export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProps<TMeta>, SlideState> {
 	public readonly state = { canUnmount: false };
 	public readonly progressionChanged = createSignal();
 
@@ -47,12 +47,12 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 		const prevState = this.state;
 		return (
 			prevState.canUnmount !== nextState.canUnmount ||
-			prevProps.component !== nextProps.component ||
+			prevProps.content !== nextProps.content ||
 			prevProps.metadata !== nextProps.metadata
 		);
 	}
 
-	public render({ class: customClass, component, metadata, persist }: SlideProps, { canUnmount }: SlideState) {
+	public render({ class: customClass, content, metadata, persist }: SlideProps<TMeta>, { canUnmount }: SlideState) {
 		return (
 			<div
 				ref={this.onWrapperRef}
@@ -67,7 +67,7 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 					? null
 					: (
 						<SlideContext.Provider value={this}>
-							{h(component, { metadata })}
+							{h(content, { metadata })}
 						</SlideContext.Provider>
 					)}
 			</div>
@@ -89,7 +89,7 @@ export class Slide<TMeta = any> extends SlideshowResource<SlideLayout, SlideProp
 		this.progressionChanged();
 	}
 
-	protected onUpdateSlideshow(context: SlideshowProvider | null, props: SlideProps, isFrame?: boolean) {
+	protected onUpdateSlideshow(context: SlideshowProvider | null, props: SlideProps<TMeta>, isFrame?: boolean) {
 		if (context !== this.context) {
 			this.context?.unsetSlide(this);
 		}

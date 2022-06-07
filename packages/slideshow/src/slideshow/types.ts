@@ -3,23 +3,23 @@ import type { JSAnimation, JSAnimationOptions } from '~/utils/JSAnimation';
 import type { Slide } from './Slide';
 import type { Viewport } from './Viewport';
 
-export interface SlideConfig<TMetadata> {
+export interface SlideConfig<TMeta = any> {
 	dock: number;
 	length: number;
-	metadata: TMetadata;
+	metadata: TMeta;
 	order: number;
 	isMounted: boolean;
 }
 
-export interface SlideLayout extends Readonly<SlideConfig<any>> {
+export interface SlideLayout<TMeta = any> extends Readonly<SlideConfig<TMeta>> {
 	canUnmount: boolean;
 	isInvisible: boolean;
 	position: number;
 	progression: Progression;
 }
 
-export interface SlideInfo<TMetadata = any> extends Readonly<SlideConfig<TMetadata>> {
-	readonly component: Slide;
+export interface SlideInfo<TMeta = any> extends Readonly<SlideConfig<TMeta>> {
+	readonly component: Slide<TMeta>;
 	scrollOffset: number;
 }
 
@@ -41,9 +41,9 @@ export interface ViewportInfo extends Readonly<ViewportConfig> {
 	readonly component: Viewport;
 }
 
-export interface Navigation<TMetadata = any> {
+export interface Navigation<TMeta = any> {
 	activeIndex: number;
-	slides: readonly SlideInfo<TMetadata>[];
+	slides: readonly SlideInfo<TMeta>[];
 	goTo(index: number, animation?: JSAnimationOptions): JSAnimation | undefined;
 }
 

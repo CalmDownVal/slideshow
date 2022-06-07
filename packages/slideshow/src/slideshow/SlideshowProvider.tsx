@@ -39,7 +39,7 @@ export class SlideshowProvider extends Component<SlideshowProviderProps> impleme
 		);
 	}
 
-	public setSlide(slide: Slide, config: SlideConfig<any>, isFrame?: boolean) {
+	public setSlide<TMeta>(slide: Slide<TMeta>, config: SlideConfig<TMeta>, isFrame?: boolean) {
 		const existing = this.slideMap.get(slide);
 		if (!existing) {
 			const newSlide = {
@@ -250,11 +250,12 @@ function byOrderAsc(a: SlideInfo, b: SlideInfo) {
 	return a.order - b.order;
 }
 
-function apply<T extends Record<string, any>>(current: T, incoming: T) {
+function apply<T extends Record<string, any>>(current: T, incoming: Partial<T>) {
 	let didChange = false;
 	for (const key in incoming) {
-		if (current[key] !== incoming[key]) {
-			current[key] = incoming[key];
+		const value = incoming[key];
+		if (value !== undefined && current[key] !== value) {
+			current[key] = value!;
 			didChange = true;
 		}
 	}
